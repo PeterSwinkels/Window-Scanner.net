@@ -193,9 +193,7 @@ Public Module WindowScannerModule
       Try
          Dim Buffer As IntPtr = AllocHGlobal(UShort.MaxValue)
          Dim Length As Integer = CInt(CheckForError(GetClassNameW(WindowH, Buffer, UShort.MaxValue)))
-         Dim WindowClass As String = ""
-
-         WindowClass = If(Length > 0, PtrToStringUni(Buffer).Substring(0, Length), "")
+         Dim WindowClass As String = If(Length > 0, PtrToStringUni(Buffer).Substring(0, Length), "")
 
          FreeHGlobal(Buffer)
 
