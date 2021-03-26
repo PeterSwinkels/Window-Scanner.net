@@ -14,10 +14,10 @@ Imports System.Runtime.InteropServices.Marshal
 Imports System.Threading.Thread
 Imports System.Windows.Forms
 
-'This module contains the procedures for the main interface window.
+'This module contains the main interface window's procedures.
 Public Class InterfaceWindow
 
-   'This list defines the window properties which can be excluded from the search results.
+   'This enumeration lists the window properties which can be excluded from the search results.
    Private Enum ExcludableE As Integer
       ExcludeNone = -1    'Exclude no windows.
       ExcludeChild        'Child windows.
@@ -112,7 +112,7 @@ Public Class InterfaceWindow
       End Try
    End Sub
 
-   'This procedure changes the window's parent window.
+   'This procedure changes the selected window's parent window.
    Private Sub ChangeParentMenu_Click(sender As Object, e As EventArgs) Handles ChangeParentMenu.Click
       Try
          Dim NewParent As String = Nothing
@@ -328,7 +328,7 @@ Public Class InterfaceWindow
       End Try
    End Sub
 
-   'This procedure displays the base class information for the selected window.
+   'This procedure displays the selected window's base class information.
    Private Sub GetBaseClassInformationMenu_Click(sender As Object, e As EventArgs) Handles GetBaseClassInformationMenu.Click
       Try
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
@@ -344,7 +344,7 @@ Public Class InterfaceWindow
       End Try
    End Sub
 
-   'This procedure displays the process information for the selected window.
+   'This procedure displays the selected window's process information.
    Private Sub GetProcessInformationMenu_Click(sender As Object, e As EventArgs) Handles GetProcessInformationMenu.Click
       Try
          Dim Message As String = Nothing
@@ -371,7 +371,7 @@ Public Class InterfaceWindow
       End Try
    End Sub
 
-   'This procedure opens this program's help.
+   'This procedure gives the command to open this program's help file.
    Private Sub HelpMenu_Click(sender As Object, e As EventArgs) Handles HelpMenu.Click
       Try
          Dim HelpPath As String = Path.Combine(My.Application.Info.DirectoryPath, "Winscan.hta")
@@ -483,7 +483,7 @@ Public Class InterfaceWindow
       End Try
    End Sub
 
-   'This procedure handles events for the window menu.
+   'This procedure handles the window menu's events.
    Private Sub WindowMainMenuItem_Click(sender As Object, e As EventArgs) Handles WindowMainMenu.Click
       Try
          Dim Item As New ToolStripMenuItem
@@ -739,7 +739,7 @@ Public Class InterfaceWindow
       Return Nothing
    End Function
 
-   'This procedure compares the specified texts with each other according to the selected comparisson options.
+   'This procedure compares the specified texts using the options selected by the user.
    Private Function Match(CompareText As String, SearchText As String) As Boolean
       Try
          If Not CaseSensitiveBox.Checked Then

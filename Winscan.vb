@@ -127,19 +127,19 @@ Public Module WindowScannerModule
 
    'This structure defines the thread, module and process information of a window.
    Public Structure WindowProcessStr
-#If PLATFORM = "x86" Then          '
-      Public ModuleH As Integer    '
-#ElseIf PLATFORM = "x64" Then      'The handle of the module that created the window.
-      Public ModuleH As Long       '
-#End If                            '
-      Public ModulePath As String  'The path of the module that created the window.
-      Public ProcessH As Integer   'The handle of the process to which the window belongs.
-      Public ProcessId As Integer  'The id of the process to which the window belongs.
-      Public ProcessPath As String 'The path of the process' executable to which the window belongs.
-      Public ThreadId As Integer   'The window's thread id.
+#If PLATFORM = "x86" Then            '
+      Public ModuleH As Integer      '
+#ElseIf PLATFORM = "x64" Then        'Defines the handle of the module that created the window.
+      Public ModuleH As Long         '
+#End If                              '
+      Public ModulePath As String    'Defines the path of the module that created the window.
+      Public ProcessH As Integer     'Defines the handle of the process to which the window belongs.
+      Public ProcessId As Integer    'Defines the id of the process to which the window belongs.
+      Public ProcessPath As String   'Defines the path of the process' executable to which the window belongs.
+      Public ThreadId As Integer     'Defines the window's thread id.
    End Structure
 
-   Public WindowHs As New List(Of Integer) 'Contains the list of any active windows found.
+   Public WindowHs As New List(Of Integer)   'Contains the list of any active windows found.
 
    'This procedure checks whether an error has occurred during the most recent Windows API call.
    Public Function CheckForError(Optional ReturnValue As Object = Nothing, Optional ResetSuppression As Boolean = False) As Object
@@ -366,7 +366,7 @@ Public Module WindowScannerModule
    'This procedure indicates whether a window has the specified style.
    Public Function WindowHasStyle(WindowH As Integer, Style As Integer) As Boolean
       Try
-         Return ((CInt(CheckForError(GetWindowLongA(WindowH, GWL_STYLE), )) And Style) = Style)
+         Return ((CInt(CheckForError(GetWindowLongA(WindowH, GWL_STYLE))) And Style) = Style)
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
