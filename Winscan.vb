@@ -105,7 +105,7 @@ Public Module WindowScannerModule
    End Function
    <DllImport("User32.dll", SetLastError:=True)> Private Function PostMessageA(ByVal hwnd As Integer, ByVal wMsg As Integer, ByVal wParam As Integer, ByVal lParam As Integer) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function RealGetWindowClassW(ByVal hwnd As Integer, ByVal pszType As IntPtr, ByVal cchType As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Private Function RealGetWindowClassW(ByVal hwnd As Integer, ByVal pszType As IntPtr, ByVal cchType As Integer) As Integer
    End Function
    <DllImport("User32.dll", SetLastError:=True)> Public Function ScreenToClient(ByVal hwnd As Integer, ByRef lpPoint As Drawing.Point) As Integer
    End Function
