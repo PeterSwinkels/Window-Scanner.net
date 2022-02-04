@@ -152,6 +152,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Input.resx">
       <DependentUpon>Input.vb</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Interface.resx">
       <DependentUpon>Interface.vb</DependentUpon>

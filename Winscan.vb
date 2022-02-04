@@ -174,9 +174,9 @@ Public Module WindowScannerModule
       Try
          Dim Buffer As IntPtr = AllocHGlobal(UShort.MaxValue)
          Dim Length As Integer = CInt(CheckForError(RealGetWindowClassW(WindowH, Buffer, UShort.MaxValue)))
-         Dim WindowBaseClass As String = ""
+         Dim WindowBaseClass As String = Nothing
 
-         WindowBaseClass = If(Length > 0, PtrToStringUni(Buffer).Substring(0, Length), "")
+         WindowBaseClass = If(Length > 0, PtrToStringUni(Buffer).Substring(0, Length), Nothing)
 
          FreeHGlobal(Buffer)
 
@@ -185,7 +185,7 @@ Public Module WindowScannerModule
          HandleError(ExceptionO)
       End Try
 
-      Return ""
+      Return Nothing
    End Function
 
    'This procedure returns the specified window's class.
@@ -193,7 +193,7 @@ Public Module WindowScannerModule
       Try
          Dim Buffer As IntPtr = AllocHGlobal(UShort.MaxValue)
          Dim Length As Integer = CInt(CheckForError(GetClassNameW(WindowH, Buffer, UShort.MaxValue)))
-         Dim WindowClass As String = If(Length > 0, PtrToStringUni(Buffer).Substring(0, Length), "")
+         Dim WindowClass As String = If(Length > 0, PtrToStringUni(Buffer).Substring(0, Length), Nothing)
 
          FreeHGlobal(Buffer)
 
@@ -202,7 +202,7 @@ Public Module WindowScannerModule
          HandleError(ExceptionO)
       End Try
 
-      Return ""
+      Return Nothing
    End Function
 
    'This procedure returns the process information for the specified window.
@@ -218,8 +218,8 @@ Public Module WindowScannerModule
 #ElseIf PLATFORM = "x64" Then
             .ModuleH = CLng(CheckForError(GetClassLongPtr(WindowH, GCL_HMODULE)))
 #End If
-            .ModulePath = ""
-            .ProcessPath = ""
+            .ModulePath = Nothing
+            .ProcessPath = Nothing
             .ThreadId = CInt(CheckForError(GetWindowThreadProcessId(WindowH, .ProcessId)))
 
             .ProcessH = CInt(CheckForError(OpenProcess(PROCESS_ALL_ACCESS, CInt(False), .ProcessId)))
@@ -230,7 +230,7 @@ Public Module WindowScannerModule
 
                .ModulePath = PtrToStringUni(Buffer)
                FreeHGlobal(Buffer)
-               .ModulePath = If(Length > 0, .ModulePath.Substring(0, Length), "")
+               .ModulePath = If(Length > 0, .ModulePath.Substring(0, Length), Nothing)
             End If
 
             .ProcessH = CInt(CheckForError(OpenProcess(PROCESS_QUERY_INFORMATION, CInt(False), .ProcessId)))
@@ -241,7 +241,7 @@ Public Module WindowScannerModule
 
                .ProcessPath = PtrToStringUni(Buffer)
                FreeHGlobal(Buffer)
-               .ProcessPath = If(Length > 0, .ProcessPath.Substring(0, Length), "")
+               .ProcessPath = If(Length > 0, .ProcessPath.Substring(0, Length), Nothing)
             End If
          End With
 
@@ -259,7 +259,7 @@ Public Module WindowScannerModule
          Dim Buffer As New IntPtr
          Dim Length As New Integer
          Dim PasswordCharacter As New Integer
-         Dim WindowText As String = ""
+         Dim WindowText As String = Nothing
 
          If WindowHasStyle(WindowH, ES_PASSWORD) Then
             PasswordCharacter = CInt(CheckForError(SendMessageW(WindowH, EM_GETPASSWORDCHAR, Nothing, Nothing)))
@@ -275,7 +275,7 @@ Public Module WindowScannerModule
          WindowText = PtrToStringUni(Buffer)
          FreeHGlobal(Buffer)
 
-         WindowText = If(Length <= WindowText.Length, WindowText.Substring(0, Length), "")
+         WindowText = If(Length <= WindowText.Length, WindowText.Substring(0, Length), Nothing)
 
          If Not PasswordCharacter = Nothing Then CheckForError(PostMessageA(WindowH, EM_SETPASSWORDCHAR, PasswordCharacter, Nothing))
 
@@ -284,7 +284,7 @@ Public Module WindowScannerModule
          HandleError(ExceptionO)
       End Try
 
-      Return ""
+      Return Nothing
    End Function
 
    'This procedure handles any errors that occur and notifies the user.
