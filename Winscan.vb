@@ -7,9 +7,11 @@ Option Strict On
 Imports System
 Imports System.Collections.Generic
 Imports System.ComponentModel
+Imports System.Diagnostics
 Imports System.Environment
 Imports System.Runtime.InteropServices
 Imports System.Runtime.InteropServices.Marshal
+Imports System.Text
 Imports System.Threading.Thread
 Imports System.Windows.Forms
 
@@ -146,7 +148,7 @@ Public Module WindowScannerModule
       Try
          Dim Description As String = Nothing
          Dim ErrorCode As Integer = GetLastWin32Error()
-         Dim Message As String = Nothing
+         Dim Message As New StringBuilder
          Static SuppressAPIErrors As Boolean = False
 
          If ResetSuppression Then SuppressAPIErrors = False
@@ -155,11 +157,11 @@ Public Module WindowScannerModule
             Description = New Win32Exception(ErrorCode).Message
 
             If Not SuppressAPIErrors Then
-               Message = $"API error code: {ErrorCode} - {Description}{NewLine}"
-               Message &= $"Return value: {ReturnValue}{NewLine}"
-               Message &= "Continue displaying API error messages?"
+               Message.Append($"API error code: {ErrorCode} - {Description}{NewLine}")
+               Message.Append($"Return value: {ReturnValue}{NewLine}")
+               Message.Append("Continue displaying API error messages?")
 
-               SuppressAPIErrors = (MessageBox.Show(Message, My.Application.Info.Title, MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) = DialogResult.No)
+               SuppressAPIErrors = (MessageBox.Show(Message.ToString(), My.Application.Info.Title, MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) = DialogResult.No)
             End If
          End If
       Catch ExceptionO As Exception
@@ -168,6 +170,15 @@ Public Module WindowScannerModule
 
       Return ReturnValue
    End Function
+
+   'This procedure attempts to enter debug mode.
+   Public Sub EnterDebugMode()
+      Try
+         Process.EnterDebugMode()
+      Catch ExceptionO As Exception
+         HandleError(ExceptionO)
+      End Try
+   End Sub
 
    'This procedure returns the specified window's base class.
    Public Function GetWindowBaseClass(WindowH As Integer) As String
@@ -324,27 +335,52 @@ Public Module WindowScannerModule
       Return CInt(True)
    End Function
 
-   'This procedure indicates whether the specified handle refers to a window.
-   Public Function RefersToWindow(WindowH As Integer) As Boolean
-      Dim HIsWindow As Boolean = False
-
+   'This procedure returns information about this program.
+   Public Function ProgramInformation() As String
       Try
-         Dim Message As String = Nothing
+         Dim Information As New StringBuilder
 
-         HIsWindow = CBool(CheckForError(IsWindow(WindowH)))
+         With My.Application.Info
+            Information.Append($"{ .Title} v{ .Version} - by: { .CompanyName}")
 
-         If Not HIsWindow Then
-            Message = $"The selected object is not a window.{NewLine}"
-            Message &= $"This could be due to the following causes:{NewLine}"
-            Message &= $"The window no longer exists,{NewLine}"
-            Message &= "or its handle has changed."
-            MessageBox.Show(Message, My.Application.Info.Title, MessageBoxButtons.OK, MessageBoxIcon.Information)
-         End If
+#If PLATFORM = "x86" Then
+            Information.Append(" (x86)")
+#ElseIf PLATFORM = "x64" Then
+            Information.Append(" (x64)")
+#End If
+         End With
+
+         Return Information.ToString()
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
 
-      Return HIsWindow
+      Return Nothing
+
+   End Function
+
+   'This procedure indicates whether the specified handle refers to a window.
+   Public Function RefersToWindow(WindowH As Integer) As Boolean
+      Try
+         Dim HIsWindow As Boolean = False
+         Dim Message As New StringBuilder
+
+         HIsWindow = CBool(CheckForError(IsWindow(WindowH)))
+
+         If Not HIsWindow Then
+            Message.Append($"The selected object is not a window.{NewLine}")
+            Message.Append($"This could be due to the following causes:{NewLine}")
+            Message.Append($"The window no longer exists,{NewLine}")
+            Message.Append("or its handle has changed.")
+            MessageBox.Show(Message.ToString(), My.Application.Info.Title, MessageBoxButtons.OK, MessageBoxIcon.Information)
+         End If
+
+         Return HIsWindow
+      Catch ExceptionO As Exception
+         HandleError(ExceptionO)
+      End Try
+
+      Return False
    End Function
 
    'This procedure displays the input dialog and returns the user's input.

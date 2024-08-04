@@ -11,6 +11,7 @@ Imports System.Drawing
 Imports System.Environment
 Imports System.IO
 Imports System.Runtime.InteropServices.Marshal
+Imports System.Text
 Imports System.Threading.Thread
 Imports System.Windows.Forms
 
@@ -39,22 +40,11 @@ Public Class InterfaceWindow
    'This procedure intializes this window when this program is started.
    Public Sub New()
       Try
-         Process.EnterDebugMode()
-      Catch ExceptionO As Exception
-         HandleError(ExceptionO)
-      End Try
-
-      Try
          InitializeComponent()
 
-         With My.Application.Info
-            Me.Text = $"{ .Title} v{ .Version} - by: { .CompanyName}"
-#If PLATFORM = "x86" Then
-            Me.Text &=  " (x86)"
-#ElseIf PLATFORM = "x64" Then
-            Me.Text &= " (x64)"
-#End If
-         End With
+         EnterDebugMode()
+
+         Me.Text = ProgramInformation()
 
          With My.Computer.Screen.Bounds
             Me.Size = New Size(CInt(.Width / 2), CInt(.Height / 2))
@@ -341,7 +331,7 @@ Public Class InterfaceWindow
    'This procedure displays the selected window's process information.
    Private Sub GetProcessInformationMenu_Click(sender As Object, e As EventArgs) Handles GetProcessInformationMenu.Click
       Try
-         Dim Message As String = Nothing
+         Dim Message As New StringBuilder
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
          Dim WindowProcess As New WindowProcessStr
 
@@ -349,13 +339,13 @@ Public Class InterfaceWindow
             WindowProcess = GetWindowProcess(WindowH)
 
             With WindowProcess
-               Message = $"Process: { .ProcessH} - { .ProcessPath}{NewLine}"
-               Message &= $"Process id: { .ProcessId}{NewLine}"
-               Message &= $"Thread id: { .ThreadId}{NewLine}"
-               Message &= $"Module: { .ModuleH} - { .ModulePath}"
+               Message.Append($"Process: { .ProcessH} - { .ProcessPath}{NewLine}")
+               Message.Append($"Process id: { .ProcessId}{NewLine}")
+               Message.Append($"Thread id: { .ThreadId}{NewLine}")
+               Message.Append($"Module: { .ModuleH} - { .ModulePath}")
             End With
 
-            MessageBox.Show(Message, $"{My.Application.Info.Title} - {WindowH}", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show(Message.ToString(), $"{My.Application.Info.Title} - {WindowH}", MessageBoxButtons.OK, MessageBoxIcon.Information)
          Else
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
          End If
