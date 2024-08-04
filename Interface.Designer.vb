@@ -262,26 +262,26 @@ Partial Class InterfaceWindow
         Me.HelpMenu.Name = "HelpMenu"
         Me.HelpMenu.ShortcutKeyDisplayString = ""
         Me.HelpMenu.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.H), System.Windows.Forms.Keys)
-        Me.HelpMenu.Size = New System.Drawing.Size(159, 22)
+        Me.HelpMenu.Size = New System.Drawing.Size(180, 22)
         Me.HelpMenu.Text = "&Help"
         '
         'InformationMenu
         '
         Me.InformationMenu.Name = "InformationMenu"
         Me.InformationMenu.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.J), System.Windows.Forms.Keys)
-        Me.InformationMenu.Size = New System.Drawing.Size(159, 22)
+        Me.InformationMenu.Size = New System.Drawing.Size(180, 22)
         Me.InformationMenu.Text = "&Information"
         '
         'ProgramSeparator1Menu
         '
         Me.ProgramSeparator1Menu.Name = "ProgramSeparator1Menu"
-        Me.ProgramSeparator1Menu.Size = New System.Drawing.Size(156, 6)
+        Me.ProgramSeparator1Menu.Size = New System.Drawing.Size(177, 6)
         '
         'QuitMenu
         '
         Me.QuitMenu.Name = "QuitMenu"
         Me.QuitMenu.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.X), System.Windows.Forms.Keys)
-        Me.QuitMenu.Size = New System.Drawing.Size(159, 22)
+        Me.QuitMenu.Size = New System.Drawing.Size(180, 22)
         Me.QuitMenu.Text = "&Quit"
         '
         'SearchResultsMainMenu
@@ -296,14 +296,14 @@ Partial Class InterfaceWindow
         '
         Me.CopyMenu.Name = "CopyMenu"
         Me.CopyMenu.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.C), System.Windows.Forms.Keys)
-        Me.CopyMenu.Size = New System.Drawing.Size(171, 22)
+        Me.CopyMenu.Size = New System.Drawing.Size(180, 22)
         Me.CopyMenu.Text = "&Copy."
         '
         'FindNextMatchMenu
         '
         Me.FindNextMatchMenu.Name = "FindNextMatchMenu"
         Me.FindNextMatchMenu.ShortcutKeys = System.Windows.Forms.Keys.F3
-        Me.FindNextMatchMenu.Size = New System.Drawing.Size(171, 22)
+        Me.FindNextMatchMenu.Size = New System.Drawing.Size(180, 22)
         Me.FindNextMatchMenu.Text = "Find &next match."
         '
         'FindTextMenu
@@ -311,7 +311,7 @@ Partial Class InterfaceWindow
         Me.FindTextMenu.Name = "FindTextMenu"
         Me.FindTextMenu.ShortcutKeyDisplayString = ""
         Me.FindTextMenu.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.F), System.Windows.Forms.Keys)
-        Me.FindTextMenu.Size = New System.Drawing.Size(171, 22)
+        Me.FindTextMenu.Size = New System.Drawing.Size(180, 22)
         Me.FindTextMenu.Text = "&Find text."
         '
         'WindowMainMenu
@@ -423,7 +423,7 @@ Partial Class InterfaceWindow
         Me.WindowContextMenu.ImageScalingSize = New System.Drawing.Size(20, 20)
         Me.WindowContextMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.CloseWindowMenu, Me.EnableDisableWindowMenu, Me.ShowHideWindowMenu, Me.WindowSeparator1Menu, Me.ChangePositionDimensionsMenu, Me.ChangeParentMenu, Me.ChangeStateMenu, Me.ChangeTextMenu, Me.ChangeZOrderMainMenu, Me.FlashWindowMenu, Me.WindowSeparator2Menu, Me.GetBaseClassInformationMenu, Me.GetProcessInformationMenu})
         Me.WindowContextMenu.Name = "WindowMainMenu"
-        Me.WindowContextMenu.Size = New System.Drawing.Size(272, 280)
+        Me.WindowContextMenu.Size = New System.Drawing.Size(272, 258)
         '
         'CloseWindowMenu
         '

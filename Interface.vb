@@ -76,37 +76,37 @@ Public Class InterfaceWindow
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
          Dim Xywh As String = Nothing
 
-         If Not RefersToWindow(WindowH) Then
-            FormatSearchResult(SearchResultsTable.CurrentRow.Index)
-            Exit Sub
-         End If
+         If RefersToWindow(WindowH) Then
+            CheckForError(GetWindowRect(WindowH, Dimensions))
 
-         CheckForError(GetWindowRect(WindowH, Dimensions))
+            With Dimensions
+               NewXywh(2) = CStr(.Right - .Left)
+               NewXywh(3) = CStr(.Bottom - .Top)
 
-         With Dimensions
-            NewXywh(2) = CStr(.Right - .Left)
-            NewXywh(3) = CStr(.Bottom - .Top)
+               ParentH = CInt(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value)
+               If Not ParentH = Nothing Then
+                  Coordinate.X = .Left
+                  Coordinate.Y = .Top
+                  CheckForError(ScreenToClient(ParentH, Coordinate))
+                  .Left = Coordinate.X
+                  .Top = Coordinate.Y
+               End If
 
-            ParentH = CInt(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value)
-            If Not ParentH = Nothing Then
-               Coordinate.X = .Left
-               Coordinate.Y = .Top
-               CheckForError(ScreenToClient(ParentH, Coordinate))
-               .Left = Coordinate.X
-               .Top = Coordinate.Y
+               NewXywh(0) = CStr(.Left)
+               NewXywh(1) = CStr(.Top)
+            End With
+
+            Xywh = ShowInputDialog("New dimensions and position (x, y, width, height):", String.Join(","c, NewXywh))
+            If Not Xywh = Nothing Then
+               NewXywh = Xywh.Replace(" ", Nothing).Split(","c)
+
+               CheckForError(MoveWindow(WindowH, ToInt32(NewXywh(0)), ToInt32(NewXywh(1)), ToInt32(NewXywh(2)), ToInt32(NewXywh(3)), CInt(True)))
+               RefreshWindow(WindowH)
+               UpdateSearchResults()
             End If
-
-            NewXywh(0) = CStr(.Left)
-            NewXywh(1) = CStr(.Top)
-         End With
-
-         Xywh = ShowInputDialog("New dimensions and position (x, y, width, height):", String.Join(","c, NewXywh))
-         If Xywh = Nothing Then Exit Sub
-         NewXywh = Xywh.Replace(" ", Nothing).Split(","c)
-
-         CheckForError(MoveWindow(WindowH, ToInt32(NewXywh(0)), ToInt32(NewXywh(1)), ToInt32(NewXywh(2)), ToInt32(NewXywh(3)), CInt(True)))
-         RefreshWindow(WindowH)
-         UpdateSearchResults()
+         Else
+            FormatSearchResult(SearchResultsTable.CurrentRow.Index)
+         End If
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
@@ -120,27 +120,26 @@ Public Class InterfaceWindow
          Dim Styles As New Integer
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
 
-         If Not RefersToWindow(WindowH) Then
-            FormatSearchResult(SearchResultsTable.CurrentRow.Index)
-            Exit Sub
-         End If
+         If RefersToWindow(WindowH) Then
+            NewParent = CStr(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value)
+            NewParent = ShowInputDialog("New parent window:", NewParent)
+            If Not NewParent = Nothing Then
+               CheckForError(SetParent(WindowH, ToInt32(NewParent)))
 
-         NewParent = CStr(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value)
-         NewParent = ShowInputDialog("New parent window:", NewParent)
-         If NewParent = Nothing Then Exit Sub
+               Styles = CInt(CheckForError(GetWindowLongA(WindowH, GWL_STYLE)))
+               If ToInt32(NewParent) = Nothing Then
+                  If WindowHasStyle(WindowH, WS_CHILD) Then Styles = Styles Xor WS_CHILD
+               Else
+                  Styles = Styles Or WS_CHILD
+               End If
+               CheckForError(SetWindowLongA(WindowH, GWL_STYLE, Styles))
 
-         CheckForError(SetParent(WindowH, ToInt32(NewParent)))
-
-         Styles = CInt(CheckForError(GetWindowLongA(WindowH, GWL_STYLE)))
-         If ToInt32(NewParent) = Nothing Then
-            If WindowHasStyle(WindowH, WS_CHILD) Then Styles = Styles Xor WS_CHILD
+               RefreshWindow(WindowH)
+               UpdateSearchResults()
+            End If
          Else
-            Styles = Styles Or WS_CHILD
+            FormatSearchResult(SearchResultsTable.CurrentRow.Index)
          End If
-         CheckForError(SetWindowLongA(WindowH, GWL_STYLE, Styles))
-
-         RefreshWindow(WindowH)
-         UpdateSearchResults()
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
@@ -169,18 +168,17 @@ Public Class InterfaceWindow
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
          Dim WindowText As String = Nothing
 
-         If Not RefersToWindow(WindowH) Then
+         If RefersToWindow(WindowH) Then
+            WindowText = GetWindowText(WindowH)
+            WindowText = ShowInputDialog("New window text:", WindowText, Button)
+            If Button = DialogResult.OK Then
+               CheckForError(SendMessageW(WindowH, WM_SETTEXT, Nothing, StringToHGlobalUni(WindowText)))
+               RefreshWindow(WindowH)
+               UpdateSearchResults()
+            End If
+         Else
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
-            Exit Sub
          End If
-
-         WindowText = GetWindowText(WindowH)
-         WindowText = ShowInputDialog("New window text:", WindowText, Button)
-         If Button = DialogResult.Cancel Then Exit Sub
-
-         CheckForError(SendMessageW(WindowH, WM_SETTEXT, Nothing, StringToHGlobalUni(WindowText)))
-         RefreshWindow(WindowH)
-         UpdateSearchResults()
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
@@ -192,15 +190,14 @@ Public Class InterfaceWindow
          Dim ParentH As New Integer
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
 
-         If Not RefersToWindow(WindowH) Then
+         If RefersToWindow(WindowH) Then
+            ParentH = CInt(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value)
+            CheckForError(SendMessageW(WindowH, WM_CLOSE, Nothing, IntPtr.Zero))
+            If Not ParentH = Nothing Then RefreshWindow(ParentH)
+            UpdateSearchResults()
+         Else
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
-            Exit Sub
          End If
-
-         ParentH = CInt(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value)
-         CheckForError(SendMessageW(WindowH, WM_CLOSE, Nothing, Nothing))
-         If Not ParentH = Nothing Then RefreshWindow(ParentH)
-         UpdateSearchResults()
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
@@ -238,14 +235,13 @@ Public Class InterfaceWindow
       Try
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
 
-         If Not RefersToWindow(WindowH) Then
+         If RefersToWindow(WindowH) Then
+            CheckForError(EnableWindow(WindowH, CInt(Not CBool(CheckForError(IsWindowEnabled(WindowH))))))
+            RefreshWindow(WindowH)
+            UpdateSearchResults()
+         Else
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
-            Exit Sub
          End If
-
-         CheckForError(EnableWindow(WindowH, CInt(Not CBool(CheckForError(IsWindowEnabled(WindowH))))))
-         RefreshWindow(WindowH)
-         UpdateSearchResults()
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
@@ -292,35 +288,34 @@ Public Class InterfaceWindow
          Dim ParentH As New Integer
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
 
-         If Not RefersToWindow(WindowH) Then
+         If RefersToWindow(WindowH) Then
+            Do
+               CheckForError(EnableWindow(WindowH, CInt(True)))
+               CheckForError(ShowWindow(WindowH, SW_SHOWNA))
+               CheckForError(BringWindowToTop(WindowH))
+               If CBool(CheckForError(IsIconic(WindowH))) Then CheckForError(ShowWindow(WindowH, SW_RESTORE))
+
+               ParentH = CInt(CheckForError(GetParent(WindowH)))
+               If ParentH = Nothing Then Exit Do
+               WindowH = ParentH
+            Loop
+
+            Cursor = Cursors.WaitCursor
+            WindowH = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
+            CheckForError(ShowWindow(WindowH, SW_SHOWNA))
+            For Flash As Integer = 0 To 9
+               CheckForError(ShowWindow(WindowH, SW_HIDE))
+               My.Application.DoEvents()
+               Sleep(250)
+               CheckForError(ShowWindow(WindowH, SW_SHOWNA))
+               My.Application.DoEvents()
+               Sleep(250)
+            Next Flash
+
+            UpdateSearchResults()
+         Else
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
-            Exit Sub
          End If
-
-         Do
-            CheckForError(EnableWindow(WindowH, CInt(True)))
-            CheckForError(ShowWindow(WindowH, SW_SHOWNA))
-            CheckForError(BringWindowToTop(WindowH))
-            If CBool(CheckForError(IsIconic(WindowH))) Then CheckForError(ShowWindow(WindowH, SW_RESTORE))
-
-            ParentH = CInt(CheckForError(GetParent(WindowH)))
-            If ParentH = Nothing Then Exit Do
-            WindowH = ParentH
-         Loop
-
-         Cursor = Cursors.WaitCursor
-         WindowH = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
-         CheckForError(ShowWindow(WindowH, SW_SHOWNA))
-         For Flash As Integer = 0 To 9
-            CheckForError(ShowWindow(WindowH, SW_HIDE))
-            My.Application.DoEvents()
-            Sleep(250)
-            CheckForError(ShowWindow(WindowH, SW_SHOWNA))
-            My.Application.DoEvents()
-            Sleep(250)
-         Next Flash
-
-         UpdateSearchResults()
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       Finally
@@ -333,12 +328,11 @@ Public Class InterfaceWindow
       Try
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
 
-         If Not RefersToWindow(WindowH) Then
+         If RefersToWindow(WindowH) Then
+            MessageBox.Show($"Base class: {GetWindowBaseClass(WindowH)}.", $"{My.Application.Info.Title} - {WindowH}", MessageBoxButtons.OK, MessageBoxIcon.Information)
+         Else
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
-            Exit Sub
          End If
-
-         MessageBox.Show($"Base class: {GetWindowBaseClass(WindowH)}.", $"{My.Application.Info.Title} - {WindowH}", MessageBoxButtons.OK, MessageBoxIcon.Information)
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
@@ -351,21 +345,20 @@ Public Class InterfaceWindow
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
          Dim WindowProcess As New WindowProcessStr
 
-         If Not RefersToWindow(WindowH) Then
+         If RefersToWindow(WindowH) Then
+            WindowProcess = GetWindowProcess(WindowH)
+
+            With WindowProcess
+               Message = $"Process: { .ProcessH} - { .ProcessPath}{NewLine}"
+               Message &= $"Process id: { .ProcessId}{NewLine}"
+               Message &= $"Thread id: { .ThreadId}{NewLine}"
+               Message &= $"Module: { .ModuleH} - { .ModulePath}"
+            End With
+
+            MessageBox.Show(Message, $"{My.Application.Info.Title} - {WindowH}", MessageBoxButtons.OK, MessageBoxIcon.Information)
+         Else
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
-            Exit Sub
          End If
-
-         WindowProcess = GetWindowProcess(WindowH)
-
-         With WindowProcess
-            Message = $"Process: { .ProcessH} - { .ProcessPath}{NewLine}"
-            Message &= $"Process id: { .ProcessId}{NewLine}"
-            Message &= $"Thread id: { .ThreadId}{NewLine}"
-            Message &= $"Module: { .ModuleH} - { .ModulePath}"
-         End With
-
-         MessageBox.Show(Message, $"{My.Application.Info.Title} - {WindowH}", MessageBoxButtons.OK, MessageBoxIcon.Information)
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
@@ -469,15 +462,14 @@ Public Class InterfaceWindow
       Try
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
 
-         If Not RefersToWindow(WindowH) Then
+         If RefersToWindow(WindowH) Then
+            CheckForError(ShowWindow(WindowH, If(CBool(CheckForError(IsWindowVisible(WindowH))), SW_HIDE, SW_SHOWNA)))
+
+            RefreshWindow(WindowH)
+            UpdateSearchResults()
+         Else
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
-            Exit Sub
          End If
-
-         CheckForError(ShowWindow(WindowH, If(CBool(CheckForError(IsWindowVisible(WindowH))), SW_HIDE, SW_SHOWNA)))
-
-         RefreshWindow(WindowH)
-         UpdateSearchResults()
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
@@ -562,14 +554,14 @@ Public Class InterfaceWindow
       Try
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
 
-         If Not RefersToWindow(WindowH) Then
+         If RefersToWindow(WindowH) Then
+            CheckForError(ShowWindow(WindowH, NewState))
+            RefreshWindow(WindowH)
+            UpdateSearchResults()
+         Else
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
-            Exit Sub
          End If
 
-         CheckForError(ShowWindow(WindowH, NewState))
-         RefreshWindow(WindowH)
-         UpdateSearchResults()
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
@@ -581,19 +573,18 @@ Public Class InterfaceWindow
          Dim Dimensions As New RECT
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
 
-         If Not RefersToWindow(WindowH) Then
+         If RefersToWindow(WindowH) Then
+            CheckForError(GetWindowRect(WindowH, Dimensions))
+
+            With Dimensions
+               CheckForError(SetWindowPos(WindowH, NewZOrder, Nothing, Nothing, .Right - .Left, .Bottom - .Top, SWP_DRAWFRAME Or SWP_NOACTIVATE Or SWP_NOMOVE Or SWP_SHOWWINDOW))
+            End With
+
+            RefreshWindow(WindowH)
+            UpdateSearchResults()
+         Else
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
-            Exit Sub
          End If
-
-         CheckForError(GetWindowRect(WindowH, Dimensions))
-
-         With Dimensions
-            CheckForError(SetWindowPos(WindowH, NewZOrder, Nothing, Nothing, .Right - .Left, .Bottom - .Top, SWP_DRAWFRAME Or SWP_NOACTIVATE Or SWP_NOMOVE Or SWP_SHOWWINDOW))
-         End With
-
-         RefreshWindow(WindowH)
-         UpdateSearchResults()
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
@@ -602,6 +593,7 @@ Public Class InterfaceWindow
    'This procedure searches the search results for the specified text.
    Private Sub FindInSearchResults(SearchText As String, FindNext As Boolean, ByRef FoundColumn? As Integer, ByRef FoundRow? As Integer)
       Try
+         Dim Matched As Boolean = False
          Dim StartColumn As New Integer
 
          Cursor = Cursors.WaitCursor
@@ -613,14 +605,16 @@ Public Class InterfaceWindow
 
             For Row As Integer = .CurrentRow.Index To .RowCount - 1
                For Column As Integer = StartColumn To .ColumnCount - 1
-                  If Match(CStr(.Rows(Row).Cells(Column).Value).ToUpper, SearchText.ToUpper) Then
+                  Matched = Match(CStr(.Rows(Row).Cells(Column).Value).ToUpper, SearchText.ToUpper)
+                  If Matched Then
                      FoundColumn = Column
                      FoundRow = Row
                      .CurrentCell = .Rows(Row).Cells(Column)
                      Cursor = Cursors.Default
-                     Exit Sub
+                     Exit For
                   End If
                Next Column
+               If Matched Then Exit For
                StartColumn = 0
             Next Row
          End With
@@ -641,18 +635,19 @@ Public Class InterfaceWindow
 
          If (SearchText = Nothing) OrElse (Not FindNext) Then
             NewSearchText = ShowInputDialog("Find:", SearchText)
-            If NewSearchText = Nothing Then Exit Sub
-            SearchText = NewSearchText
+            If Not NewSearchText = Nothing Then SearchText = NewSearchText
          End If
 
-         FindInSearchResults(SearchText, FindNext, FoundColumn, FoundRow)
-         If FoundColumn Is Nothing AndAlso FoundRow Is Nothing Then
-            If MessageBox.Show($"Could not find ""{SearchText}"".{NewLine}Search again from start?", My.Application.Info.Title, MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
-               With SearchResultsTable
-                  If .RowCount > 0 Then .CurrentCell = .Rows(0).Cells(0)
-               End With
-               FindInSearchResults(SearchText, FindNext, FoundColumn, FoundRow)
-               If FoundColumn Is Nothing AndAlso FoundRow Is Nothing Then MessageBox.Show($"Could not find ""{SearchText}.""", My.Application.Info.Title, MessageBoxButtons.OK, MessageBoxIcon.Information)
+         If Not SearchText = Nothing Then
+            FindInSearchResults(SearchText, FindNext, FoundColumn, FoundRow)
+            If FoundColumn Is Nothing AndAlso FoundRow Is Nothing Then
+               If MessageBox.Show($"Could not find ""{SearchText}"".{NewLine}Search again from start?", My.Application.Info.Title, MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+                  With SearchResultsTable
+                     If .RowCount > 0 Then .CurrentCell = .Rows(0).Cells(0)
+                  End With
+                  FindInSearchResults(SearchText, FindNext, FoundColumn, FoundRow)
+                  If FoundColumn Is Nothing AndAlso FoundRow Is Nothing Then MessageBox.Show($"Could not find ""{SearchText}.""", My.Application.Info.Title, MessageBoxButtons.OK, MessageBoxIcon.Information)
+               End If
             End If
          End If
       Catch ExceptionO As Exception
@@ -793,8 +788,7 @@ Public Class InterfaceWindow
          For Each WindowH As Integer In WindowHs
             If LookForParentWindowsBox.Checked Then
                WindowParent = WindowH
-               Do Until Match(GetWindowClass(WindowParent), WindowClassBox.Text) AndAlso Match(GetWindowText(WindowParent), WindowTextBox.Text)
-                  If CInt(CheckForError(GetParent(WindowParent))) = Nothing Then Exit Do
+               Do Until (Match(GetWindowClass(WindowParent), WindowClassBox.Text) AndAlso Match(GetWindowText(WindowParent), WindowTextBox.Text)) OrElse (CInt(CheckForError(GetParent(WindowParent))) = Nothing)
                   WindowParent = CInt(CheckForError(GetParent(WindowParent)))
                Loop
             End If

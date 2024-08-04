@@ -262,14 +262,14 @@ Public Module WindowScannerModule
          Dim WindowText As String = Nothing
 
          If WindowHasStyle(WindowH, ES_PASSWORD) Then
-            PasswordCharacter = CInt(CheckForError(SendMessageW(WindowH, EM_GETPASSWORDCHAR, Nothing, Nothing)))
+            PasswordCharacter = CInt(CheckForError(SendMessageW(WindowH, EM_GETPASSWORDCHAR, Nothing, IntPtr.Zero)))
             If Not PasswordCharacter = Nothing Then
                CheckForError(PostMessageA(WindowH, EM_SETPASSWORDCHAR, Nothing, Nothing))
                Sleep(1000)
             End If
          End If
 
-         Length = CInt(CheckForError(SendMessageW(WindowH, WM_GETTEXTLENGTH, Nothing, Nothing))) + 1
+         Length = CInt(CheckForError(SendMessageW(WindowH, WM_GETTEXTLENGTH, Nothing, IntPtr.Zero))) + 1
          Buffer = AllocHGlobal(UShort.MaxValue)
          Length = CInt(CheckForError(SendMessageW(WindowH, WM_GETTEXT, Length, Buffer)))
          WindowText = PtrToStringUni(Buffer)
