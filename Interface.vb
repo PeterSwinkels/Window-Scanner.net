@@ -727,9 +727,12 @@ Public Class InterfaceWindow
    'This procedure compares the specified texts using the options selected by the user.
    Private Function Match(CompareText As String, SearchText As String) As Boolean
       Try
+         If CompareText Is Nothing Then CompareText = ""
+         If SearchText Is Nothing Then SearchText = ""
+
          If Not CaseSensitiveBox.Checked Then
-            CompareText = CompareText.ToUpper
-            SearchText = SearchText.ToUpper
+            CompareText = CompareText.ToUpper()
+            SearchText = SearchText.ToUpper()
          End If
 
          If IgnoreAmpersandsBox.Checked Then
