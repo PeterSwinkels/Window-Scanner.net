@@ -240,7 +240,7 @@ Public Module WindowScannerModule
             End If
 
             .ProcessH = CInt(CheckForError(OpenProcess(PROCESS_QUERY_INFORMATION, CInt(False), .ProcessId)))
-            If Not .ProcessH = 0 Then
+            If Not .ProcessH = Nothing Then
                Buffer = AllocHGlobal(UShort.MaxValue)
                Length = CInt(CheckForError(GetProcessImageFileNameW(New IntPtr(.ProcessH), Buffer, UShort.MaxValue)))
                CheckForError(CloseHandle(New IntPtr(.ProcessH)))
@@ -268,14 +268,14 @@ Public Module WindowScannerModule
          Dim WindowText As String = Nothing
 
          If WindowHasStyle(WindowH, ES_PASSWORD) Then
-            PasswordCharacter = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), EM_GETPASSWORDCHAR, Nothing, IntPtr.Zero)))
+            PasswordCharacter = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), EM_GETPASSWORDCHAR, IntPtr.Zero, IntPtr.Zero)))
             If Not PasswordCharacter = Nothing Then
-               CheckForError(PostMessageA(New IntPtr(WindowH), EM_SETPASSWORDCHAR, Nothing, Nothing))
+               CheckForError(PostMessageA(New IntPtr(WindowH), EM_SETPASSWORDCHAR, IntPtr.Zero, IntPtr.Zero))
                Sleep(1000)
             End If
          End If
 
-         Length = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), WM_GETTEXTLENGTH, Nothing, IntPtr.Zero))) + 1
+         Length = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero))) + 1
          Buffer = AllocHGlobal(UShort.MaxValue)
          Length = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), WM_GETTEXT, CType(Length, IntPtr), Buffer)))
          WindowText = PtrToStringUni(Buffer)
@@ -283,7 +283,7 @@ Public Module WindowScannerModule
 
          WindowText = If(Length <= WindowText.Length, WindowText.Substring(0, Length), Nothing)
 
-         If Not PasswordCharacter = Nothing Then CheckForError(PostMessageA(New IntPtr(WindowH), EM_SETPASSWORDCHAR, CType(PasswordCharacter, IntPtr), Nothing))
+         If Not PasswordCharacter = Nothing Then CheckForError(PostMessageA(New IntPtr(WindowH), EM_SETPASSWORDCHAR, CType(PasswordCharacter, IntPtr), IntPtr.Zero))
 
          Return WindowText
       Catch ExceptionO As Exception
@@ -322,7 +322,7 @@ Public Module WindowScannerModule
    Public Function HandleWindow(hWnd As IntPtr, lParam As IntPtr) As Integer
       Try
          WindowHs.Add(hWnd.ToInt32())
-         EnumChildWindows(hWnd, AddressOf HandleChildWindow, Nothing)
+         EnumChildWindows(hWnd, AddressOf HandleChildWindow, IntPtr.Zero)
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
