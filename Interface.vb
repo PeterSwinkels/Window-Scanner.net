@@ -67,7 +67,7 @@ Public Class InterfaceWindow
          Dim Xywh As String = Nothing
 
          If RefersToWindow(WindowH) Then
-            CheckForError(GetWindowRect(WindowH, Dimensions))
+            CheckForError(GetWindowRect(New IntPtr(WindowH), Dimensions))
 
             With Dimensions
                NewXywh(2) = CStr(.Right - .Left)
@@ -77,7 +77,7 @@ Public Class InterfaceWindow
                If Not ParentH = Nothing Then
                   Coordinate.X = .Left
                   Coordinate.Y = .Top
-                  CheckForError(ScreenToClient(ParentH, Coordinate))
+                  CheckForError(ScreenToClient(New IntPtr(ParentH), Coordinate))
                   .Left = Coordinate.X
                   .Top = Coordinate.Y
                End If
@@ -90,7 +90,7 @@ Public Class InterfaceWindow
             If Not Xywh = Nothing Then
                NewXywh = Xywh.Replace(" ", Nothing).Split(","c)
 
-               CheckForError(MoveWindow(WindowH, ToInt32(NewXywh(0)), ToInt32(NewXywh(1)), ToInt32(NewXywh(2)), ToInt32(NewXywh(3)), CInt(True)))
+               CheckForError(MoveWindow(New IntPtr(WindowH), ToInt32(NewXywh(0)), ToInt32(NewXywh(1)), ToInt32(NewXywh(2)), ToInt32(NewXywh(3)), CInt(True)))
                RefreshWindow(WindowH)
                UpdateSearchResults()
             End If
@@ -114,15 +114,15 @@ Public Class InterfaceWindow
             NewParent = CStr(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value)
             NewParent = ShowInputDialog("New parent window:", NewParent)
             If Not NewParent = Nothing Then
-               CheckForError(SetParent(WindowH, ToInt32(NewParent)))
+               CheckForError(SetParent(New IntPtr(WindowH), New IntPtr(ToInt32(NewParent))))
 
-               Styles = CInt(CheckForError(GetWindowLongA(WindowH, GWL_STYLE)))
+               Styles = CInt(CheckForError(GetWindowLongA(New IntPtr(WindowH), GWL_STYLE)))
                If ToInt32(NewParent) = Nothing Then
                   If WindowHasStyle(WindowH, WS_CHILD) Then Styles = Styles Xor WS_CHILD
                Else
                   Styles = Styles Or WS_CHILD
                End If
-               CheckForError(SetWindowLongA(WindowH, GWL_STYLE, Styles))
+               CheckForError(SetWindowLongA(New IntPtr(WindowH), GWL_STYLE, Styles))
 
                RefreshWindow(WindowH)
                UpdateSearchResults()
@@ -162,7 +162,7 @@ Public Class InterfaceWindow
             WindowText = GetWindowText(WindowH)
             WindowText = ShowInputDialog("New window text:", WindowText, Button)
             If Button = DialogResult.OK Then
-               CheckForError(SendMessageW(WindowH, WM_SETTEXT, Nothing, StringToHGlobalUni(WindowText)))
+               CheckForError(SendMessageW(New IntPtr(WindowH), WM_SETTEXT, IntPtr.Zero, StringToHGlobalUni(WindowText)))
                RefreshWindow(WindowH)
                UpdateSearchResults()
             End If
@@ -182,7 +182,7 @@ Public Class InterfaceWindow
 
          If RefersToWindow(WindowH) Then
             ParentH = CInt(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value)
-            CheckForError(SendMessageW(WindowH, WM_CLOSE, Nothing, IntPtr.Zero))
+            CheckForError(SendMessageW(New IntPtr(WindowH), WM_CLOSE, IntPtr.Zero, IntPtr.Zero))
             If Not ParentH = Nothing Then RefreshWindow(ParentH)
             UpdateSearchResults()
          Else
@@ -226,7 +226,7 @@ Public Class InterfaceWindow
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
 
          If RefersToWindow(WindowH) Then
-            CheckForError(EnableWindow(WindowH, CInt(Not CBool(CheckForError(IsWindowEnabled(WindowH))))))
+            CheckForError(EnableWindow(New IntPtr(WindowH), CInt(Not CBool(CheckForError(IsWindowEnabled(New IntPtr(WindowH)))))))
             RefreshWindow(WindowH)
             UpdateSearchResults()
          Else
@@ -280,24 +280,24 @@ Public Class InterfaceWindow
 
          If RefersToWindow(WindowH) Then
             Do
-               CheckForError(EnableWindow(WindowH, CInt(True)))
-               CheckForError(ShowWindow(WindowH, SW_SHOWNA))
-               CheckForError(BringWindowToTop(WindowH))
-               If CBool(CheckForError(IsIconic(WindowH))) Then CheckForError(ShowWindow(WindowH, SW_RESTORE))
+               CheckForError(EnableWindow(New IntPtr(WindowH), CInt(True)))
+               CheckForError(ShowWindow(New IntPtr(WindowH), SW_SHOWNA))
+               CheckForError(BringWindowToTop(New IntPtr(WindowH)))
+               If CBool(CheckForError(IsIconic(New IntPtr(WindowH)))) Then CheckForError(ShowWindow(New IntPtr(WindowH), SW_RESTORE))
 
-               ParentH = CInt(CheckForError(GetParent(WindowH)))
+               ParentH = CType(CheckForError(GetParent(New IntPtr(WindowH))), IntPtr).ToInt32()
                If ParentH = Nothing Then Exit Do
                WindowH = ParentH
             Loop
 
             Cursor = Cursors.WaitCursor
             WindowH = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
-            CheckForError(ShowWindow(WindowH, SW_SHOWNA))
+            CheckForError(ShowWindow(New IntPtr(WindowH), SW_SHOWNA))
             For Flash As Integer = 0 To 9
-               CheckForError(ShowWindow(WindowH, SW_HIDE))
+               CheckForError(ShowWindow(New IntPtr(WindowH), SW_HIDE))
                My.Application.DoEvents()
                Sleep(250)
-               CheckForError(ShowWindow(WindowH, SW_SHOWNA))
+               CheckForError(ShowWindow(New IntPtr(WindowH), SW_SHOWNA))
                My.Application.DoEvents()
                Sleep(250)
             Next Flash
@@ -453,7 +453,7 @@ Public Class InterfaceWindow
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
 
          If RefersToWindow(WindowH) Then
-            CheckForError(ShowWindow(WindowH, If(CBool(CheckForError(IsWindowVisible(WindowH))), SW_HIDE, SW_SHOWNA)))
+            CheckForError(ShowWindow(New IntPtr(WindowH), If(CBool(CheckForError(IsWindowVisible(New IntPtr(WindowH)))), SW_HIDE, SW_SHOWNA)))
 
             RefreshWindow(WindowH)
             UpdateSearchResults()
@@ -545,7 +545,7 @@ Public Class InterfaceWindow
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
 
          If RefersToWindow(WindowH) Then
-            CheckForError(ShowWindow(WindowH, NewState))
+            CheckForError(ShowWindow(New IntPtr(WindowH), NewState))
             RefreshWindow(WindowH)
             UpdateSearchResults()
          Else
@@ -564,10 +564,10 @@ Public Class InterfaceWindow
          Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
 
          If RefersToWindow(WindowH) Then
-            CheckForError(GetWindowRect(WindowH, Dimensions))
+            CheckForError(GetWindowRect(New IntPtr(WindowH), Dimensions))
 
             With Dimensions
-               CheckForError(SetWindowPos(WindowH, NewZOrder, Nothing, Nothing, .Right - .Left, .Bottom - .Top, SWP_DRAWFRAME Or SWP_NOACTIVATE Or SWP_NOMOVE Or SWP_SHOWWINDOW))
+               CheckForError(SetWindowPos(New IntPtr(WindowH), NewZOrder, Nothing, Nothing, .Right - .Left, .Bottom - .Top, SWP_DRAWFRAME Or SWP_NOACTIVATE Or SWP_NOMOVE Or SWP_SHOWWINDOW))
             End With
 
             RefreshWindow(WindowH)
@@ -656,12 +656,12 @@ Public Class InterfaceWindow
             .Height = 16
             If Not ParentH = Nothing Then .Cells("WindowHandleColumn").Style.Alignment = DataGridViewContentAlignment.MiddleRight
 
-            If CBool(CheckForError(IsWindow(WindowH))) Then
+            If CBool(CheckForError(IsWindow(New IntPtr(WindowH)))) Then
                .DefaultCellStyle.BackColor = If(WindowHasStyle(WindowH, WS_POPUP), Color.Cyan, Color.White)
-               .DefaultCellStyle.ForeColor = If(CBool(CheckForError(IsWindowEnabled(WindowH))), Color.Black, Color.Red)
-               .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, If(CBool(CheckForError(IsWindowVisible(WindowH))), FontStyle.Bold, FontStyle.Regular))
+               .DefaultCellStyle.ForeColor = If(CBool(CheckForError(IsWindowEnabled(New IntPtr(WindowH)))), Color.Black, Color.Red)
+               .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, If(CBool(CheckForError(IsWindowVisible(New IntPtr(WindowH)))), FontStyle.Bold, FontStyle.Regular))
                If WindowHasStyle(WindowH, ES_PASSWORD) Then .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, FontStyle.Italic)
-            ElseIf Not CBool(CheckForError(IsWindow(WindowH))) Then
+            ElseIf Not CBool(CheckForError(IsWindow(New intptr(WindowH)))) Then
                .DefaultCellStyle.BackColor = Color.White
                .DefaultCellStyle.ForeColor = Color.Yellow
                .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, FontStyle.Bold)
@@ -684,17 +684,17 @@ Public Class InterfaceWindow
             If Item.Checked Then
                Select Case Exclusion
                   Case ExcludableE.ExcludeChild
-                     Excluded = (Not CInt(CheckForError(GetParent(WindowH))) = 0)
+                     Excluded = (Not CType(CheckForError(GetParent(New IntPtr(WindowH))), IntPtr) = IntPtr.Zero)
                   Case ExcludableE.ExcludeParent
-                     Excluded = (CInt(CheckForError(GetParent(WindowH))) = 0)
+                     Excluded = (CType(CheckForError(GetParent(New IntPtr(WindowH))), IntPtr) = IntPtr.Zero)
                   Case ExcludableE.ExcludeDisabled
-                     Excluded = Not CBool(CheckForError(IsWindowEnabled(WindowH)))
+                     Excluded = Not CBool(CheckForError(IsWindowEnabled(New IntPtr(WindowH))))
                   Case ExcludableE.ExcludeEnabled
-                     Excluded = CBool(CheckForError(IsWindowEnabled(WindowH)))
+                     Excluded = CBool(CheckForError(IsWindowEnabled(New IntPtr(WindowH))))
                   Case ExcludableE.ExcludeHidden
-                     Excluded = Not CBool(CheckForError(IsWindowVisible(WindowH)))
+                     Excluded = Not CBool(CheckForError(IsWindowVisible(New IntPtr(WindowH))))
                   Case ExcludableE.ExcludeVisible
-                     Excluded = CBool(CheckForError(IsWindowVisible(WindowH)))
+                     Excluded = CBool(CheckForError(IsWindowVisible(New IntPtr(WindowH))))
                   Case ExcludableE.ExcludeNonGroup
                      Excluded = Not WindowHasStyle(WindowH, WS_GROUP)
                   Case ExcludableE.ExcludeGroup
@@ -708,9 +708,9 @@ Public Class InterfaceWindow
                   Case ExcludableE.ExcludeTabStop
                      Excluded = WindowHasStyle(WindowH, WS_TABSTOP)
                   Case ExcludableE.ExcludeNonUnicode
-                     Excluded = Not CBool(CheckForError(IsWindowUnicode(WindowH)))
+                     Excluded = Not CBool(CheckForError(IsWindowUnicode(New IntPtr(WindowH))))
                   Case ExcludableE.ExcludeUnicode
-                     Excluded = CBool(CheckForError(IsWindowUnicode(WindowH)))
+                     Excluded = CBool(CheckForError(IsWindowUnicode(New IntPtr(WindowH))))
                End Select
             End If
             If Excluded Then Exit For
@@ -756,8 +756,8 @@ Public Class InterfaceWindow
    Private Sub RefreshWindow(WindowH As Integer)
       Try
          Do
-            CheckForError(UpdateWindow(WindowH))
-            WindowH = CInt(CheckForError(GetParent(WindowH)))
+            CheckForError(UpdateWindow(New IntPtr(WindowH)))
+            WindowH = CType(CheckForError(GetParent(New IntPtr(WindowH))), IntPtr).ToInt32()
             My.Application.DoEvents()
          Loop Until WindowH = Nothing
       Catch ExceptionO As Exception
@@ -774,22 +774,22 @@ Public Class InterfaceWindow
          Dim WindowText As String = Nothing
 
          WindowHs.Clear()
-         WindowHs.Add(CInt(CheckForError(GetDesktopWindow())))
-         CheckForError(EnumWindows(AddressOf HandleWindow, Nothing))
+         WindowHs.Add(CType(CheckForError(GetDesktopWindow()), IntPtr).ToInt32)
+         CheckForError(EnumWindows(AddressOf HandleWindow, IntPtr.Zero))
 
          SearchResultsTable.Rows.Clear()
          For Each WindowH As Integer In WindowHs
             If LookForParentWindowsBox.Checked Then
                WindowParent = WindowH
-               Do Until (Match(GetWindowClass(WindowParent), WindowClassBox.Text) AndAlso Match(GetWindowText(WindowParent), WindowTextBox.Text)) OrElse (CInt(CheckForError(GetParent(WindowParent))) = Nothing)
-                  WindowParent = CInt(CheckForError(GetParent(WindowParent)))
+               Do Until (Match(GetWindowClass(WindowParent), WindowClassBox.Text) AndAlso Match(GetWindowText(WindowParent), WindowTextBox.Text)) OrElse (CType(CheckForError(GetParent(New IntPtr(WindowParent))), IntPtr) = IntPtr.Zero)
+                  WindowParent = CType(CheckForError(GetParent(New IntPtr(WindowParent))), IntPtr).ToInt32()
                Loop
             End If
 
             WindowClass = If(LookForParentWindowsBox.Checked, GetWindowClass(WindowParent), GetWindowClass(WindowH))
             WindowText = If(LookForParentWindowsBox.Checked, GetWindowText(WindowParent), GetWindowText(WindowH))
 
-            ParentH = CInt(CheckForError(GetParent(WindowH)))
+            ParentH = CType(CheckForError(GetParent(New IntPtr(WindowH))), IntPtr).ToInt32()
 
             If Not IsExcluded(WindowH) Then
                If Match(WindowText, WindowTextBox.Text) AndAlso Match(WindowClass, WindowClassBox.Text) Then
@@ -819,8 +819,8 @@ Public Class InterfaceWindow
                WindowMainMenu.Enabled = (.CurrentRow.Index >= 0)
 
                If .CurrentRow.Index >= 0 Then
-                  EnableDisableWindowMenu.Text = $"{If(CBool(CheckForError(IsWindowEnabled(WindowH))), "&Disable", "&Enable")} window."
-                  ShowHideWindowMenu.Text = $"{If(CBool(CheckForError(IsWindowVisible(WindowH))), "&Hide", "Sh&ow")} window."
+                  EnableDisableWindowMenu.Text = $"{If(CBool(CheckForError(IsWindowEnabled(New IntPtr(WindowH)))), "&Disable", "&Enable")} window."
+                  ShowHideWindowMenu.Text = $"{If(CBool(CheckForError(IsWindowVisible(New IntPtr(WindowH)))), "&Hide", "Sh&ow")} window."
                End If
             Else
                SearchResultsMainMenu.Enabled = False
@@ -844,7 +844,7 @@ Public Class InterfaceWindow
          With SearchResultsTable
             For Row As Integer = 0 To .RowCount - 1
                WindowH = CInt(.Rows(Row).Cells("WindowHandleColumn").Value)
-               If CBool(CheckForError(IsWindow(WindowH))) Then SearchResultsTable.Rows(Row).SetValues(CStr(WindowH), GetWindowText(WindowH), GetWindowClass(WindowH), CInt(CheckForError(GetParent(WindowH))))
+               If CBool(CheckForError(IsWindow(New IntPtr(WindowH)))) Then SearchResultsTable.Rows(Row).SetValues(CStr(WindowH), GetWindowText(WindowH), GetWindowClass(WindowH), CType(CheckForError(GetParent(New IntPtr(WindowH))), IntPtr).ToInt32())
                FormatSearchResult(SearchResultsTable.Rows(Row).Index)
             Next Row
          End With

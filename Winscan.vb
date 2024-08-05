@@ -56,76 +56,71 @@ Public Module WindowScannerModule
    Private Const WM_GETTEXT As Integer = &HD%
    Private Const WM_GETTEXTLENGTH As Integer = &HE%
 
-   <DllImport("User32.dll", SetLastError:=True)> Public Function BringWindowToTop(ByVal hwnd As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function BringWindowToTop(ByVal hwnd As IntPtr) As Integer
    End Function
-   <DllImport("Kernel32.dll", SetLastError:=True)> Private Function CloseHandle(ByVal hObject As Integer) As Integer
+   <DllImport("Kernel32.dll", SetLastError:=True)> Private Function CloseHandle(ByVal hObject As IntPtr) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function EnableWindow(ByVal hwnd As Integer, ByVal fEnable As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function EnableWindow(ByVal hwnd As IntPtr, ByVal fEnable As Integer) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Private Function EnumChildWindows(ByVal hWndParent As Integer, ByVal lpEnumFunc As EnumWindowsProc, ByVal lParam As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Private Function EnumChildWindows(ByVal hWndParent As IntPtr, ByVal lpEnumFunc As EnumWindowsProc, ByVal lParam As IntPtr) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function EnumWindows(ByVal lpEnumFunc As EnumWindowsProc, ByVal lParam As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function EnumWindows(ByVal lpEnumFunc As EnumWindowsProc, ByVal lParam As IntPtr) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Private Function GetClassLongA(ByVal hwnd As Integer, ByVal nIndex As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Private Function GetClassLongA(ByVal hwnd As IntPtr, ByVal nIndex As Integer) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Private Function GetClassLongPtr(ByVal hwnd As Integer, ByVal nIndex As Integer) As Long
+   <DllImport("User32.dll", SetLastError:=True)> Private Function GetClassLongPtr(ByVal hwnd As IntPtr, ByVal nIndex As Integer) As Long
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Private Function GetClassNameW(ByVal hWnd As Integer, ByVal lpClassName As IntPtr, ByVal nMaxCount As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Private Function GetClassNameW(ByVal hWnd As IntPtr, ByVal lpClassName As IntPtr, ByVal nMaxCount As Integer) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function GetDesktopWindow() As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function GetDesktopWindow() As IntPtr
    End Function
-#If PLATFORM = "x86" Then
-   <DllImport("Psapi.dll", SetLastError:=True)> Private Function GetModuleFileNameExW(ByVal hProcess As Integer, ByVal hModule As Integer, ByVal ModuleName As IntPtr, ByVal nSize As Integer) As Integer
+   <DllImport("Psapi.dll", SetLastError:=True)> Private Function GetModuleFileNameExW(ByVal hProcess As IntPtr, ByVal hModule As IntPtr, ByVal ModuleName As IntPtr, ByVal nSize As Integer) As Integer
    End Function
-#ElseIf PLATFORM = "x64" Then
-   <DllImport("Psapi.dll", SetLastError:=True)> Private Function GetModuleFileNameExW(ByVal hProcess As Integer, ByVal hModule As Long, ByVal ModuleName As IntPtr, ByVal nSize As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function GetParent(ByVal hwnd As IntPtr) As IntPtr
    End Function
-#End If
-   <DllImport("User32.dll", SetLastError:=True)> Public Function GetParent(ByVal hwnd As Integer) As Integer
+   <DllImport("Psapi.dll", SetLastError:=True)> Private Function GetProcessImageFileNameW(ByVal hProcess As IntPtr, ByVal lpImageFileName As IntPtr, ByVal nSize As Integer) As Integer
    End Function
-   <DllImport("Psapi.dll", SetLastError:=True)> Private Function GetProcessImageFileNameW(ByVal hProcess As Integer, ByVal lpImageFileName As IntPtr, ByVal nSize As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function GetWindowLongA(ByVal hwnd As IntPtr, ByVal nIndex As Integer) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function GetWindowLongA(ByVal hwnd As Integer, ByVal nIndex As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function GetWindowRect(ByVal hwnd As IntPtr, ByRef lpRect As RECT) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function GetWindowRect(ByVal hwnd As Integer, ByRef lpRect As RECT) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Private Function GetWindowThreadProcessId(ByVal hwnd As IntPtr, ByRef lpdwProcessId As Integer) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Private Function GetWindowThreadProcessId(ByVal hwnd As Integer, ByRef lpdwProcessId As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function IsIconic(ByVal hwnd As IntPtr) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function IsIconic(ByVal hwnd As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function IsWindow(ByVal hwnd As IntPtr) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function IsWindow(ByVal hwnd As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function IsWindowEnabled(ByVal hwnd As IntPtr) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function IsWindowEnabled(ByVal hwnd As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function IsWindowUnicode(ByVal hwnd As IntPtr) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function IsWindowUnicode(ByVal hwnd As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function IsWindowVisible(ByVal hwnd As IntPtr) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function IsWindowVisible(ByVal hwnd As Integer) As Integer
-   End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function MoveWindow(ByVal hwnd As Integer, ByVal x As Integer, ByVal y As Integer, ByVal nWidth As Integer, ByVal nHeight As Integer, ByVal bRepaint As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function MoveWindow(ByVal hwnd As IntPtr, ByVal x As Integer, ByVal y As Integer, ByVal nWidth As Integer, ByVal nHeight As Integer, ByVal bRepaint As Integer) As Integer
    End Function
    <DllImport("Kernel32.dll", SetLastError:=True)> Private Function OpenProcess(ByVal dwDesiredAccess As Integer, ByVal bInheritHandle As Integer, ByVal dwProcessId As Integer) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Private Function PostMessageA(ByVal hwnd As Integer, ByVal wMsg As Integer, ByVal wParam As Integer, ByVal lParam As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Private Function PostMessageA(ByVal hwnd As IntPtr, ByVal wMsg As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Private Function RealGetWindowClassW(ByVal hwnd As Integer, ByVal pszType As IntPtr, ByVal cchType As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Private Function RealGetWindowClassW(ByVal hwnd As IntPtr, ByVal pszType As IntPtr, ByVal cchType As Integer) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function ScreenToClient(ByVal hwnd As Integer, ByRef lpPoint As Drawing.Point) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function ScreenToClient(ByVal hwnd As IntPtr, ByRef lpPoint As Drawing.Point) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function SendMessageW(ByVal hwnd As Integer, ByVal Msg As Integer, ByVal wParam As Integer, ByVal lParam As IntPtr) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function SendMessageW(ByVal hwnd As IntPtr, ByVal Msg As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function SetParent(ByVal hWndChild As Integer, ByVal hWndNewParent As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function SetParent(ByVal hWndChild As IntPtr, ByVal hWndNewParent As IntPtr) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function SetWindowLongA(ByVal hwnd As Integer, ByVal nIndex As Integer, ByVal dwNewLong As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function SetWindowLongA(ByVal hwnd As IntPtr, ByVal nIndex As Integer, ByVal dwNewLong As Integer) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function ShowWindow(ByVal hwnd As Integer, ByVal nCmdShow As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function ShowWindow(ByVal hwnd As IntPtr, ByVal nCmdShow As Integer) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function SetWindowPos(ByVal hwnd As Integer, ByVal hWndInsertAfter As Integer, ByVal x As Integer, ByVal y As Integer, ByVal cx As Integer, ByVal cy As Integer, ByVal wFlags As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function SetWindowPos(ByVal hwnd As IntPtr, ByVal hWndInsertAfter As Integer, ByVal x As Integer, ByVal y As Integer, ByVal cx As Integer, ByVal cy As Integer, ByVal wFlags As Integer) As Integer
    End Function
-   <DllImport("User32.dll", SetLastError:=True)> Public Function UpdateWindow(ByVal hwnd As Integer) As Integer
+   <DllImport("User32.dll", SetLastError:=True)> Public Function UpdateWindow(ByVal hwnd As IntPtr) As Integer
    End Function
 
    'The delegates used by this program.
-   Public Delegate Function EnumWindowsProc(ByVal hWnd As Integer, ByVal lParam As Integer) As Integer
+   Public Delegate Function EnumWindowsProc(ByVal hWnd As IntPtr, ByVal lParam As IntPtr) As Integer
 
    'This structure defines the thread, module and process information of a window.
    Public Structure WindowProcessStr
@@ -184,7 +179,7 @@ Public Module WindowScannerModule
    Public Function GetWindowBaseClass(WindowH As Integer) As String
       Try
          Dim Buffer As IntPtr = AllocHGlobal(UShort.MaxValue)
-         Dim Length As Integer = CInt(CheckForError(RealGetWindowClassW(WindowH, Buffer, UShort.MaxValue)))
+         Dim Length As Integer = CInt(CheckForError(RealGetWindowClassW(New IntPtr(WindowH), Buffer, UShort.MaxValue)))
          Dim WindowBaseClass As String = Nothing
 
          WindowBaseClass = If(Length > 0, PtrToStringUni(Buffer).Substring(0, Length), Nothing)
@@ -203,7 +198,7 @@ Public Module WindowScannerModule
    Public Function GetWindowClass(WindowH As Integer) As String
       Try
          Dim Buffer As IntPtr = AllocHGlobal(UShort.MaxValue)
-         Dim Length As Integer = CInt(CheckForError(GetClassNameW(WindowH, Buffer, UShort.MaxValue)))
+         Dim Length As Integer = CInt(CheckForError(GetClassNameW(New IntPtr(WindowH), Buffer, UShort.MaxValue)))
          Dim WindowClass As String = If(Length > 0, PtrToStringUni(Buffer).Substring(0, Length), Nothing)
 
          FreeHGlobal(Buffer)
@@ -225,19 +220,19 @@ Public Module WindowScannerModule
 
          With WindowProcess
 #If PLATFORM = "x86" Then
-            .ModuleH = CInt(CheckForError(GetClassLongA(WindowH, GCL_HMODULE)))
+            .ModuleH = CInt(CheckForError(GetClassLongA(New IntPtr(WindowH), GCL_HMODULE)))
 #ElseIf PLATFORM = "x64" Then
-            .ModuleH = CLng(CheckForError(GetClassLongPtr(WindowH, GCL_HMODULE)))
+            .ModuleH = CLng(CheckForError(GetClassLongPtr(New IntPtr(WindowH), GCL_HMODULE)))
 #End If
             .ModulePath = Nothing
             .ProcessPath = Nothing
-            .ThreadId = CInt(CheckForError(GetWindowThreadProcessId(WindowH, .ProcessId)))
+            .ThreadId = CInt(CheckForError(GetWindowThreadProcessId(New IntPtr(WindowH), .ProcessId)))
 
             .ProcessH = CInt(CheckForError(OpenProcess(PROCESS_ALL_ACCESS, CInt(False), .ProcessId)))
             If Not .ProcessH = Nothing Then
                Buffer = AllocHGlobal(UShort.MaxValue)
-               Length = CInt(CheckForError(GetModuleFileNameExW(.ProcessH, .ModuleH, Buffer, UShort.MaxValue)))
-               CheckForError(CloseHandle(.ProcessH))
+               Length = CInt(CheckForError(GetModuleFileNameExW(New IntPtr(.ProcessH), New IntPtr(.ModuleH), Buffer, UShort.MaxValue)))
+               CheckForError(CloseHandle(New IntPtr(.ProcessH)))
 
                .ModulePath = PtrToStringUni(Buffer)
                FreeHGlobal(Buffer)
@@ -247,8 +242,8 @@ Public Module WindowScannerModule
             .ProcessH = CInt(CheckForError(OpenProcess(PROCESS_QUERY_INFORMATION, CInt(False), .ProcessId)))
             If Not .ProcessH = 0 Then
                Buffer = AllocHGlobal(UShort.MaxValue)
-               Length = CInt(CheckForError(GetProcessImageFileNameW(.ProcessH, Buffer, UShort.MaxValue)))
-               CheckForError(CloseHandle(.ProcessH))
+               Length = CInt(CheckForError(GetProcessImageFileNameW(New IntPtr(.ProcessH), Buffer, UShort.MaxValue)))
+               CheckForError(CloseHandle(New IntPtr(.ProcessH)))
 
                .ProcessPath = PtrToStringUni(Buffer)
                FreeHGlobal(Buffer)
@@ -273,22 +268,22 @@ Public Module WindowScannerModule
          Dim WindowText As String = Nothing
 
          If WindowHasStyle(WindowH, ES_PASSWORD) Then
-            PasswordCharacter = CInt(CheckForError(SendMessageW(WindowH, EM_GETPASSWORDCHAR, Nothing, IntPtr.Zero)))
+            PasswordCharacter = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), EM_GETPASSWORDCHAR, Nothing, IntPtr.Zero)))
             If Not PasswordCharacter = Nothing Then
-               CheckForError(PostMessageA(WindowH, EM_SETPASSWORDCHAR, Nothing, Nothing))
+               CheckForError(PostMessageA(New IntPtr(WindowH), EM_SETPASSWORDCHAR, Nothing, Nothing))
                Sleep(1000)
             End If
          End If
 
-         Length = CInt(CheckForError(SendMessageW(WindowH, WM_GETTEXTLENGTH, Nothing, IntPtr.Zero))) + 1
+         Length = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), WM_GETTEXTLENGTH, Nothing, IntPtr.Zero))) + 1
          Buffer = AllocHGlobal(UShort.MaxValue)
-         Length = CInt(CheckForError(SendMessageW(WindowH, WM_GETTEXT, Length, Buffer)))
+         Length = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), WM_GETTEXT, CType(Length, IntPtr), Buffer)))
          WindowText = PtrToStringUni(Buffer)
          FreeHGlobal(Buffer)
 
          WindowText = If(Length <= WindowText.Length, WindowText.Substring(0, Length), Nothing)
 
-         If Not PasswordCharacter = Nothing Then CheckForError(PostMessageA(WindowH, EM_SETPASSWORDCHAR, PasswordCharacter, Nothing))
+         If Not PasswordCharacter = Nothing Then CheckForError(PostMessageA(New IntPtr(WindowH), EM_SETPASSWORDCHAR, CType(PasswordCharacter, IntPtr), Nothing))
 
          Return WindowText
       Catch ExceptionO As Exception
@@ -313,9 +308,9 @@ Public Module WindowScannerModule
    End Sub
 
    'This procedure handles any active child windows found.
-   Private Function HandleChildWindow(hWnd As Integer, lParam As Integer) As Integer
+   Private Function HandleChildWindow(hWnd As IntPtr, lParam As IntPtr) As Integer
       Try
-         WindowHs.Add(hWnd)
+         WindowHs.Add(hWnd.ToInt32())
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
@@ -324,9 +319,9 @@ Public Module WindowScannerModule
    End Function
 
    'This procedure handles any active windows found.
-   Public Function HandleWindow(hWnd As Integer, lParam As Integer) As Integer
+   Public Function HandleWindow(hWnd As IntPtr, lParam As IntPtr) As Integer
       Try
-         WindowHs.Add(hWnd)
+         WindowHs.Add(hWnd.ToInt32())
          EnumChildWindows(hWnd, AddressOf HandleChildWindow, Nothing)
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
@@ -356,7 +351,6 @@ Public Module WindowScannerModule
       End Try
 
       Return Nothing
-
    End Function
 
    'This procedure indicates whether the specified handle refers to a window.
@@ -365,7 +359,7 @@ Public Module WindowScannerModule
          Dim HIsWindow As Boolean = False
          Dim Message As New StringBuilder
 
-         HIsWindow = CBool(CheckForError(IsWindow(WindowH)))
+         HIsWindow = CBool(CheckForError(IsWindow(New IntPtr(WindowH))))
 
          If Not HIsWindow Then
             Message.Append($"The selected object is not a window.{NewLine}")
@@ -402,7 +396,7 @@ Public Module WindowScannerModule
    'This procedure indicates whether a window has the specified style.
    Public Function WindowHasStyle(WindowH As Integer, Style As Integer) As Boolean
       Try
-         Return ((CInt(CheckForError(GetWindowLongA(WindowH, GWL_STYLE))) And Style) = Style)
+         Return ((CInt(CheckForError(GetWindowLongA(New IntPtr(WindowH), GWL_STYLE))) And Style) = Style)
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
