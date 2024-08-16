@@ -672,7 +672,7 @@ Public Class InterfaceWindow
       End Try
    End Sub
 
-   'This procedure checks whether the specified window has an excluded property.
+   'This procedure checks whether the specified window has an excluded property and returns the result.
    Private Function IsExcluded(WindowH As Integer) As Boolean
       Try
          Dim Excluded As Boolean = False
@@ -724,7 +724,7 @@ Public Class InterfaceWindow
       Return Nothing
    End Function
 
-   'This procedure compares the specified texts using the options selected by the user.
+   'This procedure checks whether the specified texts match using the options selected by the user and returns the result.
    Private Function Match(CompareText As String, SearchText As String) As Boolean
       Try
          If CompareText Is Nothing Then CompareText = ""

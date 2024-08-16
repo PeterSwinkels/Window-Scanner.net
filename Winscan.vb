@@ -122,6 +122,8 @@ Public Module WindowScannerModule
    'The delegates used by this program.
    Public Delegate Function EnumWindowsProc(ByVal hWnd As IntPtr, ByVal lParam As IntPtr) As Integer
 
+   'The structures and variables used by this program.
+
    'This structure defines the thread, module and process information of a window.
    Public Structure WindowProcessStr
 #If PLATFORM = "x86" Then            '
@@ -138,7 +140,7 @@ Public Module WindowScannerModule
 
    Public WindowHs As New List(Of Integer)   'Contains the list of any active windows found.
 
-   'This procedure checks whether an error has occurred during the most recent Windows API call.
+   'This procedure checks whether an error has occurred during the most recent Windows API call and returns the specified return value.
    Public Function CheckForError(Optional ReturnValue As Object = Nothing, Optional ResetSuppression As Boolean = False) As Object
       Try
          Dim Description As String = Nothing
@@ -211,7 +213,7 @@ Public Module WindowScannerModule
       Return Nothing
    End Function
 
-   'This procedure returns the process information for the specified window.
+   'This procedure returns the specified window's process information.
    Public Function GetWindowProcess(WindowH As Integer) As WindowProcessStr
       Try
          Dim Buffer As New IntPtr
@@ -259,7 +261,7 @@ Public Module WindowScannerModule
       Return New WindowProcessStr
    End Function
 
-   'This procedure returns the text contained by the specified window.
+   'This procedure returns the specified window's text.
    Public Function GetWindowText(WindowH As Integer) As String
       Try
          Dim Buffer As New IntPtr
@@ -307,7 +309,7 @@ Public Module WindowScannerModule
       End Try
    End Sub
 
-   'This procedure handles any active child windows found.
+   'This procedure handles any child windows that are found and returns whether the enumeration should continue.
    Private Function HandleChildWindow(hWnd As IntPtr, lParam As IntPtr) As Integer
       Try
          WindowHs.Add(hWnd.ToInt32())
@@ -318,7 +320,7 @@ Public Module WindowScannerModule
       Return CInt(True)
    End Function
 
-   'This procedure handles any active windows found.
+   'This procedure handles any top level windows that are found and returns whether the enumeration should continue.
    Public Function HandleWindow(hWnd As IntPtr, lParam As IntPtr) As Integer
       Try
          WindowHs.Add(hWnd.ToInt32())
@@ -353,7 +355,7 @@ Public Module WindowScannerModule
       Return Nothing
    End Function
 
-   'This procedure indicates whether the specified handle refers to a window.
+   'This procedure checks whether the specified handle refers to a window and returns the result.
    Public Function RefersToWindow(WindowH As Integer) As Boolean
       Try
          Dim HIsWindow As Boolean = False
@@ -393,7 +395,7 @@ Public Module WindowScannerModule
       Return Nothing
    End Function
 
-   'This procedure indicates whether a window has the specified style.
+   'This procedure checks whether a window has the specified style and returns the result.
    Public Function WindowHasStyle(WindowH As Integer, Style As Integer) As Boolean
       Try
          Return ((CInt(CheckForError(GetWindowLongA(New IntPtr(WindowH), GWL_STYLE))) And Style) = Style)
