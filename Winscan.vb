@@ -86,6 +86,8 @@ Public Module WindowScannerModule
    End Function
    <DllImport("User32.dll", SetLastError:=True)> Private Function GetWindowThreadProcessId(ByVal hwnd As IntPtr, ByRef lpdwProcessId As Integer) As Integer
    End Function
+   <DllImport("User32.dll", SetLastError:=True)> Public Function IsHungAppWindow(ByVal hwnd As IntPtr) As Integer
+   End Function
    <DllImport("User32.dll", SetLastError:=True)> Public Function IsIconic(ByVal hwnd As IntPtr) As Integer
    End Function
    <DllImport("User32.dll", SetLastError:=True)> Public Function IsWindow(ByVal hwnd As IntPtr) As Integer
@@ -267,25 +269,27 @@ Public Module WindowScannerModule
          Dim Buffer As New IntPtr
          Dim Length As New Integer
          Dim PasswordCharacter As New Integer
-         Dim WindowText As String = Nothing
+         Dim WindowText As String = ""
 
-         If WindowHasStyle(WindowH, ES_PASSWORD) Then
-            PasswordCharacter = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), EM_GETPASSWORDCHAR, IntPtr.Zero, IntPtr.Zero)))
-            If Not PasswordCharacter = Nothing Then
-               CheckForError(PostMessageA(New IntPtr(WindowH), EM_SETPASSWORDCHAR, IntPtr.Zero, IntPtr.Zero))
-               Sleep(1000)
+         If Not CBool(CheckForError(IsHungAppWindow(New IntPtr(WindowH)))) Then
+            If WindowHasStyle(WindowH, ES_PASSWORD) Then
+               PasswordCharacter = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), EM_GETPASSWORDCHAR, IntPtr.Zero, IntPtr.Zero)))
+               If Not PasswordCharacter = Nothing Then
+                  CheckForError(PostMessageA(New IntPtr(WindowH), EM_SETPASSWORDCHAR, IntPtr.Zero, IntPtr.Zero))
+                  Sleep(1000)
+               End If
             End If
+
+            Length = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero))) + 1
+            Buffer = AllocHGlobal(UShort.MaxValue)
+            Length = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), WM_GETTEXT, CType(Length, IntPtr), Buffer)))
+            WindowText = PtrToStringUni(Buffer)
+            FreeHGlobal(Buffer)
+
+            WindowText = If(Length <= WindowText.Length, WindowText.Substring(0, Length), Nothing)
+
+            If Not PasswordCharacter = Nothing Then CheckForError(PostMessageA(New IntPtr(WindowH), EM_SETPASSWORDCHAR, CType(PasswordCharacter, IntPtr), IntPtr.Zero))
          End If
-
-         Length = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero))) + 1
-         Buffer = AllocHGlobal(UShort.MaxValue)
-         Length = CInt(CheckForError(SendMessageW(New IntPtr(WindowH), WM_GETTEXT, CType(Length, IntPtr), Buffer)))
-         WindowText = PtrToStringUni(Buffer)
-         FreeHGlobal(Buffer)
-
-         WindowText = If(Length <= WindowText.Length, WindowText.Substring(0, Length), Nothing)
-
-         If Not PasswordCharacter = Nothing Then CheckForError(PostMessageA(New IntPtr(WindowH), EM_SETPASSWORDCHAR, CType(PasswordCharacter, IntPtr), IntPtr.Zero))
 
          Return WindowText
       Catch ExceptionO As Exception

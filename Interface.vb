@@ -653,18 +653,19 @@ Public Class InterfaceWindow
 
          With SearchResultsTable.Rows(Row)
             .Cells("WindowParentColumn").Style.Alignment = DataGridViewContentAlignment.MiddleRight
-            .Height = 16
+            .Height = 17
             If Not ParentH = Nothing Then .Cells("WindowHandleColumn").Style.Alignment = DataGridViewContentAlignment.MiddleRight
 
             If CBool(CheckForError(IsWindow(New IntPtr(WindowH)))) Then
                .DefaultCellStyle.BackColor = If(WindowHasStyle(WindowH, WS_POPUP), Color.Cyan, Color.White)
                .DefaultCellStyle.ForeColor = If(CBool(CheckForError(IsWindowEnabled(New IntPtr(WindowH)))), Color.Black, Color.Red)
-               .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, If(CBool(CheckForError(IsWindowVisible(New IntPtr(WindowH)))), FontStyle.Bold, FontStyle.Regular))
-               If WindowHasStyle(WindowH, ES_PASSWORD) Then .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, FontStyle.Italic)
-            ElseIf Not CBool(CheckForError(IsWindow(New intptr(WindowH)))) Then
+               .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, If(CBool(CheckForError(IsWindowVisible(New IntPtr(WindowH)))), SearchResultsTable.Font.Style Or FontStyle.Bold, SearchResultsTable.Font.Style Or FontStyle.Regular))
+               If WindowHasStyle(WindowH, ES_PASSWORD) Then .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, SearchResultsTable.Font.Style Or FontStyle.Italic)
+               If CBool(CheckForError(IsHungAppWindow(New IntPtr(WindowH)))) Then .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, SearchResultsTable.Font.Style Or FontStyle.Underline)
+            ElseIf Not CBool(CheckForError(IsWindow(New IntPtr(WindowH)))) Then
                .DefaultCellStyle.BackColor = Color.White
                .DefaultCellStyle.ForeColor = Color.Yellow
-               .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, FontStyle.Bold)
+               .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, SearchResultsTable.Font.Style Or FontStyle.Bold)
             End If
          End With
       Catch ExceptionO As Exception
