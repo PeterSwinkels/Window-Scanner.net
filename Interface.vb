@@ -37,7 +37,7 @@ Public Class InterfaceWindow
       ExcludeUnicode      'Unicode windows.
    End Enum
 
-   'This procedure intializes this window when this program is started.
+   'This procedure initializes this window when this program is started.
    Public Sub New()
       Try
          InitializeComponent()
@@ -858,4 +858,5 @@ Public Class InterfaceWindow
       End Try
    End Sub
 End Class
+
 
