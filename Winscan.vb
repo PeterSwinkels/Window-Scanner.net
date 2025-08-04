@@ -386,12 +386,14 @@ Public Module WindowScannerModule
    'This procedure displays the input dialog and returns the user's input.
    Public Function ShowInputDialog(Optional Prompt As String = Nothing, Optional Input As String = Nothing, Optional ByRef Button As DialogResult = Nothing) As String
       Try
-         With InputDialog
-            .PromptLabel.Text = Prompt
-            .TextBox.Text = Input
+         Dim Text As String = Nothing
+
+         With New InputDialog(Prompt, Input)
             Button = .ShowDialog()
-            Return If(Button = DialogResult.Cancel, Nothing, .TextBox.Text)
+            Text = .TextBox.Text
          End With
+
+         Return If(Button = DialogResult.Cancel, Nothing, Text)
       Catch ExceptionO As Exception
          HandleError(ExceptionO)
       End Try
