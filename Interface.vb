@@ -52,7 +52,7 @@ Public Class InterfaceWindow
 
          UpdateMenus()
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -62,22 +62,22 @@ Public Class InterfaceWindow
          Dim Coordinate As New Point
          Dim Dimensions As New RECT
          Dim NewXywh(3) As String
-         Dim ParentH As New Integer
-         Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
+         Dim ParentH As New IntPtr
+         Dim WindowH As IntPtr = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value, IntPtr)
          Dim Xywh As String = Nothing
 
          If RefersToWindow(WindowH) Then
-            CheckForError(GetWindowRect(New IntPtr(WindowH), Dimensions))
+            CheckForError(GetWindowRect(WindowH, Dimensions))
 
             With Dimensions
                NewXywh(2) = CStr(.Right - .Left)
                NewXywh(3) = CStr(.Bottom - .Top)
 
-               ParentH = CInt(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value)
-               If Not ParentH = Nothing Then
+               ParentH = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value, IntPtr)
+               If Not ParentH = IntPtr.Zero Then
                   Coordinate.X = .Left
                   Coordinate.Y = .Top
-                  CheckForError(ScreenToClient(New IntPtr(ParentH), Coordinate))
+                  CheckForError(ScreenToClient(ParentH, Coordinate))
                   .Left = Coordinate.X
                   .Top = Coordinate.Y
                End If
@@ -90,7 +90,7 @@ Public Class InterfaceWindow
             If Not Xywh = Nothing Then
                NewXywh = Xywh.Replace(" ", Nothing).Split(","c)
 
-               CheckForError(MoveWindow(New IntPtr(WindowH), ToInt32(NewXywh(0)), ToInt32(NewXywh(1)), ToInt32(NewXywh(2)), ToInt32(NewXywh(3)), CInt(True)))
+               CheckForError(MoveWindow(WindowH, ToInt32(NewXywh(0)), ToInt32(NewXywh(1)), ToInt32(NewXywh(2)), ToInt32(NewXywh(3)), CInt(True)))
                RefreshWindow(WindowH)
                UpdateSearchResults()
             End If
@@ -98,7 +98,7 @@ Public Class InterfaceWindow
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
          End If
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -106,23 +106,23 @@ Public Class InterfaceWindow
    Private Sub ChangeParentMenu_Click(sender As Object, e As EventArgs) Handles ChangeParentMenu.Click
       Try
          Dim NewParent As String = Nothing
-         Dim ParentH As New Integer
-         Dim Styles As New Integer
-         Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
+         Dim ParentH As New IntPtr
+         Dim Styles As New UInteger
+         Dim WindowH As IntPtr = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value, IntPtr)
 
          If RefersToWindow(WindowH) Then
-            NewParent = CStr(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value)
+            NewParent = CStr(DirectCast(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value, IntPtr))
             NewParent = ShowInputDialog("New parent window:", NewParent)
             If Not NewParent = Nothing Then
-               CheckForError(SetParent(New IntPtr(WindowH), New IntPtr(ToInt32(NewParent))))
+               CheckForError(SetParent(WindowH, New IntPtr(ToInt64(NewParent))))
 
-               Styles = CInt(CheckForError(GetWindowLongA(New IntPtr(WindowH), GWL_STYLE)))
-               If ToInt32(NewParent) = Nothing Then
+               Styles = CUInt(CheckForError(GetWindowLongA(WindowH, GWL_STYLE)))
+               If ToInt64(NewParent) = Nothing Then
                   If WindowHasStyle(WindowH, WS_CHILD) Then Styles = Styles Xor WS_CHILD
                Else
                   Styles = Styles Or WS_CHILD
                End If
-               CheckForError(SetWindowLongA(New IntPtr(WindowH), GWL_STYLE, Styles))
+               CheckForError(SetWindowLongA(WindowH, GWL_STYLE, Styles))
 
                RefreshWindow(WindowH)
                UpdateSearchResults()
@@ -131,7 +131,7 @@ Public Class InterfaceWindow
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
          End If
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -147,7 +147,7 @@ Public Class InterfaceWindow
                ChangeState(SW_RESTORE)
          End Select
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -155,14 +155,14 @@ Public Class InterfaceWindow
    Private Sub ChangeTextMenu_Click(sender As Object, e As EventArgs) Handles ChangeTextMenu.Click
       Try
          Dim Button As New DialogResult
-         Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
+         Dim WindowH As IntPtr = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value, IntPtr)
          Dim WindowText As String = Nothing
 
          If RefersToWindow(WindowH) Then
             WindowText = GetWindowText(WindowH)
             WindowText = ShowInputDialog("New window text:", WindowText, Button)
             If Button = DialogResult.OK Then
-               CheckForError(SendMessageW(New IntPtr(WindowH), WM_SETTEXT, IntPtr.Zero, StringToHGlobalUni(WindowText)))
+               CheckForError(SendMessageW(WindowH, WM_SETTEXT, IntPtr.Zero, StringToHGlobalUni(WindowText)))
                RefreshWindow(WindowH)
                UpdateSearchResults()
             End If
@@ -170,26 +170,26 @@ Public Class InterfaceWindow
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
          End If
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
    'This procedure closes the selected window.
    Private Sub CloseWindowMenu_Click(sender As Object, e As EventArgs) Handles CloseWindowMenu.Click
       Try
-         Dim ParentH As New Integer
-         Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
+         Dim ParentH As New IntPtr
+         Dim WindowH As IntPtr = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value, IntPtr)
 
          If RefersToWindow(WindowH) Then
-            ParentH = CInt(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value)
-            CheckForError(SendMessageW(New IntPtr(WindowH), WM_CLOSE, IntPtr.Zero, IntPtr.Zero))
-            If Not ParentH = Nothing Then RefreshWindow(ParentH)
+            ParentH = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowParentColumn").Value, IntPtr)
+            CheckForError(SendMessageW(WindowH, WM_CLOSE, IntPtr.Zero, IntPtr.Zero))
+            If Not ParentH = IntPtr.Zero Then RefreshWindow(ParentH)
             UpdateSearchResults()
          Else
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
          End If
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -207,33 +207,38 @@ Public Class InterfaceWindow
                ChangeZorder(HWND_TOP)
          End Select
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
    'This procedure copies the selected window information to the clipboard.
    Private Sub CopyMenu_Click(sender As Object, e As EventArgs) Handles CopyMenu.Click
       Try
-         My.Computer.Clipboard.SetText(CStr(SearchResultsTable.CurrentCell.Value), TextDataFormat.Text)
+         Select Case SearchResultsTable.CurrentCell.Value.GetType
+            Case GetType(IntPtr)
+               My.Computer.Clipboard.SetText(CStr(DirectCast(SearchResultsTable.CurrentCell.Value, IntPtr)), TextDataFormat.Text)
+            Case Else
+               My.Computer.Clipboard.SetText(CStr(SearchResultsTable.CurrentCell.Value), TextDataFormat.Text)
+         End Select
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
    'This procedure enables or disables the selected window.
    Private Sub EnableDisableWindowMenu_Click(sender As Object, e As EventArgs) Handles EnableDisableWindowMenu.Click
       Try
-         Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
+         Dim WindowH As IntPtr = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value, IntPtr)
 
          If RefersToWindow(WindowH) Then
-            CheckForError(EnableWindow(New IntPtr(WindowH), CInt(Not CBool(CheckForError(IsWindowEnabled(New IntPtr(WindowH)))))))
+            CheckForError(EnableWindow(WindowH, Not CBool(CheckForError(IsWindowEnabled(WindowH)))))
             RefreshWindow(WindowH)
             UpdateSearchResults()
          Else
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
          End If
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -250,7 +255,7 @@ Public Class InterfaceWindow
 
          SearchForWindows()
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -259,7 +264,7 @@ Public Class InterfaceWindow
       Try
          FindText(FindNext:=True)
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -268,36 +273,36 @@ Public Class InterfaceWindow
       Try
          FindText(FindNext:=False)
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
    'This procedure flashes the selected window.
    Private Sub FlashWindowMenu_Click(sender As Object, e As EventArgs) Handles FlashWindowMenu.Click
       Try
-         Dim ParentH As New Integer
-         Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
+         Dim ParentH As New IntPtr
+         Dim WindowH As IntPtr = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value, IntPtr)
 
          If RefersToWindow(WindowH) Then
             Do
-               CheckForError(EnableWindow(New IntPtr(WindowH), CInt(True)))
-               CheckForError(ShowWindow(New IntPtr(WindowH), SW_SHOWNA))
-               CheckForError(BringWindowToTop(New IntPtr(WindowH)))
-               If CBool(CheckForError(IsIconic(New IntPtr(WindowH)))) Then CheckForError(ShowWindow(New IntPtr(WindowH), SW_RESTORE))
+               CheckForError(EnableWindow(WindowH, True))
+               CheckForError(ShowWindow(WindowH, SW_SHOWNA))
+               CheckForError(BringWindowToTop(WindowH))
+               If CBool(CheckForError(IsIconic(WindowH))) Then CheckForError(ShowWindow(WindowH, SW_RESTORE))
 
-               ParentH = CType(CheckForError(GetParent(New IntPtr(WindowH))), IntPtr).ToInt32()
-               If ParentH = Nothing Then Exit Do
+               ParentH = DirectCast(CheckForError(GetParent(WindowH)), IntPtr)
+               If ParentH = IntPtr.Zero Then Exit Do
                WindowH = ParentH
             Loop
 
             Cursor = Cursors.WaitCursor
-            WindowH = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
-            CheckForError(ShowWindow(New IntPtr(WindowH), SW_SHOWNA))
+            WindowH = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value, IntPtr)
+            CheckForError(ShowWindow(WindowH, SW_SHOWNA))
             For Flash As Integer = 0 To 9
-               CheckForError(ShowWindow(New IntPtr(WindowH), SW_HIDE))
+               CheckForError(ShowWindow(WindowH, SW_HIDE))
                My.Application.DoEvents()
                Sleep(250)
-               CheckForError(ShowWindow(New IntPtr(WindowH), SW_SHOWNA))
+               CheckForError(ShowWindow(WindowH, SW_SHOWNA))
                My.Application.DoEvents()
                Sleep(250)
             Next Flash
@@ -307,7 +312,7 @@ Public Class InterfaceWindow
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
          End If
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       Finally
          Cursor = Cursors.Default
       End Try
@@ -316,7 +321,7 @@ Public Class InterfaceWindow
    'This procedure displays the selected window's base class information.
    Private Sub GetBaseClassInformationMenu_Click(sender As Object, e As EventArgs) Handles GetBaseClassInformationMenu.Click
       Try
-         Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
+         Dim WindowH As IntPtr = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value, IntPtr)
 
          If RefersToWindow(WindowH) Then
             MessageBox.Show($"Base class: {GetWindowBaseClass(WindowH)}.", $"{My.Application.Info.Title} - {WindowH}", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -324,7 +329,7 @@ Public Class InterfaceWindow
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
          End If
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -332,7 +337,7 @@ Public Class InterfaceWindow
    Private Sub GetProcessInformationMenu_Click(sender As Object, e As EventArgs) Handles GetProcessInformationMenu.Click
       Try
          Dim Message As New StringBuilder
-         Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
+         Dim WindowH As IntPtr = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value, IntPtr)
          Dim WindowProcess As New WindowProcessStr
 
          If RefersToWindow(WindowH) Then
@@ -350,7 +355,7 @@ Public Class InterfaceWindow
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
          End If
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -368,7 +373,7 @@ Public Class InterfaceWindow
             HelpProcess.Start()
          End If
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -377,7 +382,7 @@ Public Class InterfaceWindow
       Try
          MessageBox.Show(My.Application.Info.Description, My.Application.Info.Title, MessageBoxButtons.OK, MessageBoxIcon.Information)
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -386,7 +391,7 @@ Public Class InterfaceWindow
       Try
          Process.LeaveDebugMode()
       Catch ExceptionO As Exception
-         If Not ExceptionO.GetType().Name = "Win32Exception" Then HandleError(ExceptionO)
+         If Not ExceptionO.GetType().Name = "Win32Exception" Then DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -395,7 +400,7 @@ Public Class InterfaceWindow
       Try
          SearchForWindows()
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -404,7 +409,7 @@ Public Class InterfaceWindow
       Try
          Me.Close()
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -414,7 +419,7 @@ Public Class InterfaceWindow
          CheckForError(ResetSuppression:=True)
          SearchForWindows()
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -423,7 +428,7 @@ Public Class InterfaceWindow
       Try
          WindowContextMenu.Show(Cursor.Position)
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -432,7 +437,7 @@ Public Class InterfaceWindow
       Try
          UpdateMenus()
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -443,17 +448,17 @@ Public Class InterfaceWindow
             Column.Width = CInt(SearchResultsTable.Width / 4.1)
          Next Column
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
    'This procedure shows or hides the selected window.
    Private Sub ShowHideWindowMenu_Click(sender As Object, e As EventArgs) Handles ShowHideWindowMenu.Click
       Try
-         Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
+         Dim WindowH As IntPtr = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value, IntPtr)
 
          If RefersToWindow(WindowH) Then
-            CheckForError(ShowWindow(New IntPtr(WindowH), If(CBool(CheckForError(IsWindowVisible(New IntPtr(WindowH)))), SW_HIDE, SW_SHOWNA)))
+            CheckForError(ShowWindow(WindowH, If(CBool(CheckForError(IsWindowVisible(WindowH))), SW_HIDE, SW_SHOWNA)))
 
             RefreshWindow(WindowH)
             UpdateSearchResults()
@@ -461,7 +466,7 @@ Public Class InterfaceWindow
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
          End If
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -487,7 +492,7 @@ Public Class InterfaceWindow
             End If
          Next Index
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -535,17 +540,17 @@ Public Class InterfaceWindow
          WindowMainMenu.DropDownItems.Clear()
          WindowMainMenu.DropDownItems.AddRange(Items)
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
    'This procedure maximizes, minimizes, or restores the selected window.
-   Private Sub ChangeState(NewState As Integer)
+   Private Sub ChangeState(NewState As UInteger)
       Try
-         Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
+         Dim WindowH As IntPtr = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value, IntPtr)
 
          If RefersToWindow(WindowH) Then
-            CheckForError(ShowWindow(New IntPtr(WindowH), NewState))
+            CheckForError(ShowWindow(WindowH, NewState))
             RefreshWindow(WindowH)
             UpdateSearchResults()
          Else
@@ -553,21 +558,21 @@ Public Class InterfaceWindow
          End If
 
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
    'This procedure changes the selected window's z-order.
-   Private Sub ChangeZorder(NewZOrder As Integer)
+   Private Sub ChangeZorder(NewZOrder As UInteger)
       Try
          Dim Dimensions As New RECT
-         Dim WindowH As Integer = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
+         Dim WindowH As IntPtr = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value, IntPtr)
 
          If RefersToWindow(WindowH) Then
-            CheckForError(GetWindowRect(New IntPtr(WindowH), Dimensions))
+            CheckForError(GetWindowRect(WindowH, Dimensions))
 
             With Dimensions
-               CheckForError(SetWindowPos(New IntPtr(WindowH), NewZOrder, Nothing, Nothing, .Right - .Left, .Bottom - .Top, SWP_DRAWFRAME Or SWP_NOACTIVATE Or SWP_NOMOVE Or SWP_SHOWWINDOW))
+               CheckForError(SetWindowPos(WindowH, NewZOrder, Nothing, Nothing, .Right - .Left, .Bottom - .Top, SWP_DRAWFRAME Or SWP_NOACTIVATE Or SWP_NOMOVE Or SWP_SHOWWINDOW))
             End With
 
             RefreshWindow(WindowH)
@@ -576,7 +581,7 @@ Public Class InterfaceWindow
             FormatSearchResult(SearchResultsTable.CurrentRow.Index)
          End If
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
@@ -595,7 +600,15 @@ Public Class InterfaceWindow
 
             For Row As Integer = .CurrentRow.Index To .RowCount - 1
                For Column As Integer = StartColumn To .ColumnCount - 1
-                  Matched = Match(CStr(.Rows(Row).Cells(Column).Value).ToUpper, SearchText.ToUpper)
+                  If .Rows(Row).Cells(Column).Value IsNot Nothing Then
+                     Select Case .Rows(Row).Cells(Column).Value.GetType
+                        Case GetType(IntPtr)
+                           Matched = Match(CStr(DirectCast(.Rows(Row).Cells(Column).Value, IntPtr)), SearchText.ToUpper)
+                        Case Else
+                           Matched = Match(CStr(.Rows(Row).Cells(Column).Value).ToUpper, SearchText.ToUpper)
+                     End Select
+                  End If
+
                   If Matched Then
                      FoundColumn = Column
                      FoundRow = Row
@@ -609,7 +622,7 @@ Public Class InterfaceWindow
             Next Row
          End With
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       Finally
          Cursor = Cursors.Default
       End Try
@@ -641,40 +654,40 @@ Public Class InterfaceWindow
             End If
          End If
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
    'This procedure formats the specified search result.
    Private Sub FormatSearchResult(Row As Integer)
       Try
-         Dim ParentH As Integer = CInt(SearchResultsTable.Rows(Row).Cells("WindowParentColumn").Value)
-         Dim WindowH As Integer = CInt(SearchResultsTable.Rows(Row).Cells("WindowHandleColumn").Value)
+         Dim ParentH As IntPtr = DirectCast(SearchResultsTable.Rows(Row).Cells("WindowParentColumn").Value, IntPtr)
+         Dim WindowH As IntPtr = DirectCast(SearchResultsTable.Rows(Row).Cells("WindowHandleColumn").Value, IntPtr)
 
          With SearchResultsTable.Rows(Row)
             .Cells("WindowParentColumn").Style.Alignment = DataGridViewContentAlignment.MiddleRight
             .Height = 17
-            If Not ParentH = Nothing Then .Cells("WindowHandleColumn").Style.Alignment = DataGridViewContentAlignment.MiddleRight
+            If Not ParentH = IntPtr.Zero Then .Cells("WindowHandleColumn").Style.Alignment = DataGridViewContentAlignment.MiddleRight
 
-            If CBool(CheckForError(IsWindow(New IntPtr(WindowH)))) Then
+            If CBool(CheckForError(IsWindow(WindowH))) Then
                .DefaultCellStyle.BackColor = If(WindowHasStyle(WindowH, WS_POPUP), Color.Cyan, Color.White)
-               .DefaultCellStyle.ForeColor = If(CBool(CheckForError(IsWindowEnabled(New IntPtr(WindowH)))), Color.Black, Color.Red)
-               .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, If(CBool(CheckForError(IsWindowVisible(New IntPtr(WindowH)))), SearchResultsTable.Font.Style Or FontStyle.Bold, SearchResultsTable.Font.Style Or FontStyle.Regular))
+               .DefaultCellStyle.ForeColor = If(CBool(CheckForError(IsWindowEnabled(WindowH))), Color.Black, Color.Red)
+               .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, If(CBool(CheckForError(IsWindowVisible(WindowH))), SearchResultsTable.Font.Style Or FontStyle.Bold, SearchResultsTable.Font.Style Or FontStyle.Regular))
                If WindowHasStyle(WindowH, ES_PASSWORD) Then .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, SearchResultsTable.Font.Style Or FontStyle.Italic)
-               If CBool(CheckForError(IsHungAppWindow(New IntPtr(WindowH)))) Then .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, SearchResultsTable.Font.Style Or FontStyle.Underline)
-            ElseIf Not CBool(CheckForError(IsWindow(New IntPtr(WindowH)))) Then
+               If CBool(CheckForError(IsHungAppWindow(WindowH))) Then .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, SearchResultsTable.Font.Style Or FontStyle.Underline)
+            ElseIf Not CBool(CheckForError(IsWindow(WindowH))) Then
                .DefaultCellStyle.BackColor = Color.White
                .DefaultCellStyle.ForeColor = Color.Yellow
                .DefaultCellStyle.Font = New Font(SearchResultsTable.Font, SearchResultsTable.Font.Style Or FontStyle.Bold)
             End If
          End With
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
    'This procedure checks whether the specified window has an excluded property and returns the result.
-   Private Function IsExcluded(WindowH As Integer) As Boolean
+   Private Function IsExcluded(WindowH As IntPtr) As Boolean
       Try
          Dim Excluded As Boolean = False
          Dim Exclusion As ExcludableE = ExcludableE.ExcludeNone
@@ -685,17 +698,17 @@ Public Class InterfaceWindow
             If Item.Checked Then
                Select Case Exclusion
                   Case ExcludableE.ExcludeChild
-                     Excluded = (Not CType(CheckForError(GetParent(New IntPtr(WindowH))), IntPtr) = IntPtr.Zero)
+                     Excluded = (Not DirectCast(CheckForError(GetParent(WindowH)), IntPtr) = IntPtr.Zero)
                   Case ExcludableE.ExcludeParent
-                     Excluded = (CType(CheckForError(GetParent(New IntPtr(WindowH))), IntPtr) = IntPtr.Zero)
+                     Excluded = (DirectCast(CheckForError(GetParent(WindowH)), IntPtr) = IntPtr.Zero)
                   Case ExcludableE.ExcludeDisabled
-                     Excluded = Not CBool(CheckForError(IsWindowEnabled(New IntPtr(WindowH))))
+                     Excluded = Not CBool(CheckForError(IsWindowEnabled(WindowH)))
                   Case ExcludableE.ExcludeEnabled
-                     Excluded = CBool(CheckForError(IsWindowEnabled(New IntPtr(WindowH))))
+                     Excluded = CBool(CheckForError(IsWindowEnabled(WindowH)))
                   Case ExcludableE.ExcludeHidden
-                     Excluded = Not CBool(CheckForError(IsWindowVisible(New IntPtr(WindowH))))
+                     Excluded = Not CBool(CheckForError(IsWindowVisible(WindowH)))
                   Case ExcludableE.ExcludeVisible
-                     Excluded = CBool(CheckForError(IsWindowVisible(New IntPtr(WindowH))))
+                     Excluded = CBool(CheckForError(IsWindowVisible(WindowH)))
                   Case ExcludableE.ExcludeNonGroup
                      Excluded = Not WindowHasStyle(WindowH, WS_GROUP)
                   Case ExcludableE.ExcludeGroup
@@ -709,9 +722,9 @@ Public Class InterfaceWindow
                   Case ExcludableE.ExcludeTabStop
                      Excluded = WindowHasStyle(WindowH, WS_TABSTOP)
                   Case ExcludableE.ExcludeNonUnicode
-                     Excluded = Not CBool(CheckForError(IsWindowUnicode(New IntPtr(WindowH))))
+                     Excluded = Not CBool(CheckForError(IsWindowUnicode(WindowH)))
                   Case ExcludableE.ExcludeUnicode
-                     Excluded = CBool(CheckForError(IsWindowUnicode(New IntPtr(WindowH))))
+                     Excluded = CBool(CheckForError(IsWindowUnicode(WindowH)))
                End Select
             End If
             If Excluded Then Exit For
@@ -719,7 +732,7 @@ Public Class InterfaceWindow
 
          Return Excluded
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
 
       Return Nothing
@@ -728,8 +741,8 @@ Public Class InterfaceWindow
    'This procedure checks whether the specified texts match using the options selected by the user and returns the result.
    Private Function Match(CompareText As String, SearchText As String) As Boolean
       Try
-         If CompareText Is Nothing Then CompareText = ""
-         If SearchText Is Nothing Then SearchText = ""
+         If CompareText Is Nothing Then CompareText = String.Empty
+         If SearchText Is Nothing Then SearchText = String.Empty
 
          If Not CaseSensitiveBox.Checked Then
             CompareText = CompareText.ToUpper()
@@ -737,8 +750,11 @@ Public Class InterfaceWindow
          End If
 
          If IgnoreAmpersandsBox.Checked Then
-            CompareText = CompareText.Replace("&"c, Nothing)
-            SearchText = SearchText.Replace("&"c, Nothing)
+            CompareText = CompareText.Replace("&"c, String.Empty)
+            SearchText = SearchText.Replace("&"c, String.Empty)
+            If CompareText.StartsWith("SWI") Then
+               Diagnostics.Debug.WriteLine($"CompareText: ""{CompareText}"", SearchText: ""{SearchText}""{NewLine}")
+            End If
          End If
 
          If SearchText = Nothing Then
@@ -747,54 +763,54 @@ Public Class InterfaceWindow
             Return If(WholePhrasesOnlyBox.Checked, (SearchText = CompareText), CompareText.Contains(SearchText))
          End If
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
 
       Return False
    End Function
 
    'This procedure refreshes the specified window and any parent windows.
-   Private Sub RefreshWindow(WindowH As Integer)
+   Private Sub RefreshWindow(WindowH As IntPtr)
       Try
          Do
-            CheckForError(UpdateWindow(New IntPtr(WindowH)))
-            WindowH = CType(CheckForError(GetParent(New IntPtr(WindowH))), IntPtr).ToInt32()
+            CheckForError(UpdateWindow(WindowH))
+            WindowH = DirectCast(CheckForError(GetParent(WindowH)), IntPtr)
             My.Application.DoEvents()
-         Loop Until WindowH = Nothing
+         Loop Until WindowH = IntPtr.Zero
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
    'This procedure fills the specified table with a list of active windows contained by the current desktop.
    Private Sub SearchForWindows()
       Try
-         Dim ParentH As New Integer
+         Dim ParentH As New IntPtr
          Dim WindowClass As String = Nothing
-         Dim WindowParent As New Integer
+         Dim WindowParent As New IntPtr
          Dim WindowText As String = Nothing
 
          WindowHs.Clear()
-         WindowHs.Add(CType(CheckForError(GetDesktopWindow()), IntPtr).ToInt32)
+         WindowHs.Add(DirectCast(CheckForError(GetDesktopWindow()), IntPtr))
          CheckForError(EnumWindows(AddressOf HandleWindow, IntPtr.Zero))
 
          SearchResultsTable.Rows.Clear()
-         For Each WindowH As Integer In WindowHs
+         For Each WindowH As IntPtr In WindowHs
             If LookForParentWindowsBox.Checked Then
                WindowParent = WindowH
-               Do Until (Match(GetWindowClass(WindowParent), WindowClassBox.Text) AndAlso Match(GetWindowText(WindowParent), WindowTextBox.Text)) OrElse (CType(CheckForError(GetParent(New IntPtr(WindowParent))), IntPtr) = IntPtr.Zero)
-                  WindowParent = CType(CheckForError(GetParent(New IntPtr(WindowParent))), IntPtr).ToInt32()
+               Do Until (Match(GetWindowClass(WindowParent), WindowClassBox.Text) AndAlso Match(GetWindowText(WindowParent), WindowTextBox.Text)) OrElse (DirectCast(CheckForError(GetParent(WindowParent)), IntPtr) = IntPtr.Zero)
+                  WindowParent = DirectCast(CheckForError(GetParent(WindowParent)), IntPtr)
                Loop
             End If
 
             WindowClass = If(LookForParentWindowsBox.Checked, GetWindowClass(WindowParent), GetWindowClass(WindowH))
             WindowText = If(LookForParentWindowsBox.Checked, GetWindowText(WindowParent), GetWindowText(WindowH))
 
-            ParentH = CType(CheckForError(GetParent(New IntPtr(WindowH))), IntPtr).ToInt32()
+            ParentH = DirectCast(CheckForError(GetParent(WindowH)), IntPtr)
 
             If Not IsExcluded(WindowH) Then
                If Match(WindowText, WindowTextBox.Text) AndAlso Match(WindowClass, WindowClassBox.Text) Then
-                  SearchResultsTable.Rows.Add(CStr(WindowH), GetWindowText(WindowH), GetWindowClass(WindowH), ParentH)
+                  SearchResultsTable.Rows.Add(WindowH, GetWindowText(WindowH), GetWindowClass(WindowH), ParentH)
                   FormatSearchResult(SearchResultsTable.Rows.Count - 1)
                End If
             End If
@@ -802,26 +818,26 @@ Public Class InterfaceWindow
 
          UpdateMenus()
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
    'This procedure updates the action menu.
    Private Sub UpdateMenus()
       Try
-         Dim WindowH As New Integer
+         Dim WindowH As New IntPtr
 
          With SearchResultsTable
             If .RowCount > 0 Then
-               WindowH = CInt(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value)
+               WindowH = DirectCast(SearchResultsTable.CurrentRow.Cells("WindowHandleColumn").Value, IntPtr)
 
                SearchResultsMainMenu.Enabled = (.CurrentRow.Index >= 0)
                WindowContextMenu.Enabled = (.CurrentRow.Index >= 0)
                WindowMainMenu.Enabled = (.CurrentRow.Index >= 0)
 
                If .CurrentRow.Index >= 0 Then
-                  EnableDisableWindowMenu.Text = $"{If(CBool(CheckForError(IsWindowEnabled(New IntPtr(WindowH)))), "&Disable", "&Enable")} window."
-                  ShowHideWindowMenu.Text = $"{If(CBool(CheckForError(IsWindowVisible(New IntPtr(WindowH)))), "&Hide", "Sh&ow")} window."
+                  EnableDisableWindowMenu.Text = $"{If(CBool(CheckForError(IsWindowEnabled(WindowH))), "&Disable", "&Enable")} window."
+                  ShowHideWindowMenu.Text = $"{If(CBool(CheckForError(IsWindowVisible(WindowH))), "&Hide", "Sh&ow")} window."
                End If
             Else
                SearchResultsMainMenu.Enabled = False
@@ -832,27 +848,29 @@ Public Class InterfaceWindow
 
          BuildInterface()
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       End Try
    End Sub
 
    'This procedure updates the search results.
    Private Sub UpdateSearchResults()
       Try
-         Dim WindowH As New Integer
+         Dim WindowH As New IntPtr
 
          Cursor = Cursors.WaitCursor
          With SearchResultsTable
             For Row As Integer = 0 To .RowCount - 1
-               WindowH = CInt(.Rows(Row).Cells("WindowHandleColumn").Value)
-               If CBool(CheckForError(IsWindow(New IntPtr(WindowH)))) Then SearchResultsTable.Rows(Row).SetValues(CStr(WindowH), GetWindowText(WindowH), GetWindowClass(WindowH), CType(CheckForError(GetParent(New IntPtr(WindowH))), IntPtr).ToInt32())
+               WindowH = DirectCast(.Rows(Row).Cells("WindowHandleColumn").Value, IntPtr)
+               If CBool(CheckForError(IsWindow(WindowH))) Then
+                  SearchResultsTable.Rows(Row).SetValues(WindowH, GetWindowText(WindowH), GetWindowClass(WindowH), DirectCast(CheckForError(GetParent(WindowH)), IntPtr))
+               End If
                FormatSearchResult(SearchResultsTable.Rows(Row).Index)
             Next Row
          End With
 
          UpdateMenus()
       Catch ExceptionO As Exception
-         HandleError(ExceptionO)
+         DisplayException(ExceptionO)
       Finally
          Cursor = Cursors.Default
       End Try
